@@ -33,5 +33,9 @@ fn plain_old_enum() {
                            arguments: vec![],
                        })
         ]));
-}
 
+    assert_eq!(
+        &format!("{}", GoodBoy::to_purs_type()),
+        "Doggo | Pupper | Shibe | "
+    )
+}

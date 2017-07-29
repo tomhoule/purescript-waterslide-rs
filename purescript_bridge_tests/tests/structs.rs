@@ -23,5 +23,10 @@ fn plain_old_struct() {
                 ("name".to_string(), PursType::Leaf(Import { type_module: "PRIM" }, "String".to_string())),
             ],
         }))
-    )
+    );
+
+    assert_eq!(
+        &format!("{}", Plain::to_purs_type()),
+        "Plain { age :: Int, name :: String, }"
+    );
 }

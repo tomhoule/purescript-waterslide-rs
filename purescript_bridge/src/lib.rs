@@ -1,3 +1,6 @@
+use std::collections::BTreeMap;
+use std::fmt::{Formatter, Display};
+
 #[derive(Debug, PartialEq)]
 pub struct Import {
     pub type_module: &'static str,
@@ -23,11 +26,67 @@ pub enum Constructor {
     Record(RecordConstructor),
 }
 
+impl Display for Constructor {
+    fn fmt(&self, f: &mut Formatter) -> ::std::fmt::Result {
+        match *self {
+            Constructor::Seq(ref c) => {
+                write!(f, "{}", c)
+            },
+            Constructor::Record(ref c) => {
+                write!(f, "{}", c)
+            },
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub enum PursType {
     Struct(Constructor),
     Enum(String, Vec<Constructor>),
     Leaf(Import, String),
+}
+
+impl Display for SeqConstructor {
+    fn fmt(&self, f: &mut Formatter) -> ::std::fmt::Result {
+        write!(f, "{} ", self.name)?;
+        for ref arg in self.arguments.iter() {
+            write!(f, "{}", arg)?;
+        }
+        Ok(())
+    }
+}
+
+impl Display for RecordConstructor {
+    fn fmt(&self, f: &mut Formatter) -> ::std::fmt::Result {
+        write!(f, "{} {{ ", self.name)?;
+        for &(ref name, ref type_) in self.arguments.iter() {
+            write!(f, "{} :: {}, ", name, type_)?;
+        }
+        write!(f, "}}")
+    }
+}
+
+impl Display for PursType {
+    fn fmt(&self, f: &mut Formatter) -> ::std::fmt::Result {
+        use PursType::*;
+        use Constructor::*;
+
+        match *self {
+            Struct(Record(ref constructor)) => write!(f, "{}", constructor),
+            Enum(ref name, ref constructors) => {
+                for ref constructor in constructors.iter() {
+                    write!(f, "{}", constructor)?;
+                    write!(f, "| ")?;
+                }
+                Ok(())
+            }
+            Leaf(_, ref ty) => {
+                write!(f, "{}", ty)?;
+                Ok(())
+            },
+            _ => unimplemented!(),
+        }
+    }
 }
 
 pub trait ToPursType {
@@ -104,3 +163,9 @@ purs_primitive_impl!(f32, "Number", PRIM);
 purs_primitive_impl!(f64, "Number", PRIM);
 
 purs_primitive_impl!(String, "String", PRIM);
+
+struct Module {
+    name: String,
+    imports: BTreeMap<Import, Vec<String>>,
+    types: Vec<PursType>,
+}
