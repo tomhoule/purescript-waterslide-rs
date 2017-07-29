@@ -1,9 +1,21 @@
 use std::collections::BTreeMap;
 use std::fmt::{Formatter, Display};
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Import {
     pub type_module: &'static str,
+}
+
+impl ::std::cmp::PartialOrd for Import {
+    fn partial_cmp(&self, other: &Import) -> Option<::std::cmp::Ordering> {
+        self.type_module.partial_cmp(other.type_module)
+    }
+}
+
+impl ::std::cmp::Ord for Import {
+    fn cmp(&self, other: &Import) -> ::std::cmp::Ordering {
+        self.type_module.cmp(other.type_module)
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -26,6 +38,22 @@ pub enum Constructor {
     Record(RecordConstructor),
 }
 
+impl Constructor {
+    fn get_import(&self) -> &Option<Import> {
+        match *self {
+            Constructor::Seq(ref c) => &c.import,
+            Constructor::Record(ref c) => &c.import,
+        }
+    }
+
+    fn get_name(&self) -> &String {
+        match *self {
+            Constructor::Seq(ref c) => &c.name,
+            Constructor::Record(ref c) => &c.name,
+        }
+    }
+}
+
 impl Display for Constructor {
     fn fmt(&self, f: &mut Formatter) -> ::std::fmt::Result {
         match *self {
@@ -46,11 +74,22 @@ pub enum PursType {
     Leaf(Import, String),
 }
 
+impl PursType {
+    fn get_name(&self) -> &String {
+        use PursType::*;
+        match *self {
+            Struct(ref constructor) => constructor.get_name(),
+            Enum(ref name, _) => name,
+            Leaf(ref _import, ref name) => name,
+        }
+    }
+}
+
 impl Display for SeqConstructor {
     fn fmt(&self, f: &mut Formatter) -> ::std::fmt::Result {
         write!(f, "{} ", self.name)?;
         for ref arg in self.arguments.iter() {
-            write!(f, "{}", arg)?;
+            write!(f, "{}", arg.get_name())?;
         }
         Ok(())
     }
@@ -60,7 +99,7 @@ impl Display for RecordConstructor {
     fn fmt(&self, f: &mut Formatter) -> ::std::fmt::Result {
         write!(f, "{} {{ ", self.name)?;
         for &(ref name, ref type_) in self.arguments.iter() {
-            write!(f, "{} :: {}, ", name, type_)?;
+            write!(f, "{} :: {}, ", name, type_.get_name())?;
         }
         write!(f, "}}")
     }
@@ -164,8 +203,89 @@ purs_primitive_impl!(f64, "Number", PRIM);
 
 purs_primitive_impl!(String, "String", PRIM);
 
-struct Module {
+#[derive(Debug)]
+pub struct PursModule {
     name: String,
     imports: BTreeMap<Import, Vec<String>>,
     types: Vec<PursType>,
+}
+
+#[macro_export]
+macro_rules! purs_module {
+    ( $name:expr ; $( $p:path ),* ) => {
+        {
+            let purs_types = vec![
+                $( <$p>::to_purs_type() ),*
+            ];
+            PursModule::new($name, purs_types)
+        }
+    }
+}
+
+impl PursModule {
+    /// The `purs_module!` macro is slightly more convenient because it calls `to_purs_type` for
+    /// you.
+    pub fn new(name: String, types: Vec<PursType>) -> Self {
+        let mut imports = BTreeMap::new();
+        for type_ in types.iter() {
+            Self::accumulate_imports(&mut imports, type_)
+        }
+        PursModule {
+            name,
+            imports,
+            types,
+        }
+    }
+
+    pub fn accumulate_imports(imports: &mut BTreeMap<Import, Vec<String>>, type_: &PursType) {
+        use PursType::*;
+        use Constructor::*;
+
+        match *type_ {
+            Struct(ref constructor) => {
+                if let Some(ref import) = *constructor.get_import() {
+                    let mut value = imports.entry(import.clone()).or_insert_with(|| Vec::new());
+                    value.push(constructor.get_name().clone())
+                }
+            },
+            Enum(_, ref constructors) => {
+                for ref constructor in constructors.iter() {
+                    if let &Some(ref import) = constructor.get_import() {
+                        let mut value = imports.entry(import.clone()).or_insert_with(|| Vec::new());
+                        value.push(constructor.get_name().clone())
+                    }
+                }
+            },
+            Leaf(ref import, ref name) => {
+                let mut value = imports.entry(import.clone()).or_insert_with(|| Vec::new());
+                value.push(name.clone())
+            }
+        }
+    }
+}
+
+impl Display for PursModule {
+    fn fmt(&self, f: &mut Formatter) -> ::std::fmt::Result {
+        write!(f, "module {} where\n\n", self.name)?;
+
+        for (key, value) in self.imports.iter() {
+            write!(f, "import {} (", key.type_module)?;
+            for v in value.iter() {
+                write!(f, "{}\n", v)?;
+            }
+        }
+
+        for ref type_ in self.types.iter() {
+            match *type_ {
+                &PursType::Leaf(_, _) => panic!("Leaf types cannot be at the module top-level"),
+                &PursType::Struct(ref constructor) => {
+                    write!(f, "data {} = {}\n\n", constructor.get_name(), constructor)?
+                },
+                &PursType::Enum(ref name, ref constructors) => {
+                    write!(f, "data {} = {}\n\n", name, type_)?
+                }
+            }
+        }
+        Ok(())
+    }
 }
