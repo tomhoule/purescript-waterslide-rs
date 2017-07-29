@@ -1,0 +1,6 @@
+[package]
+name = "purescript_bridge"
+version = "0.1.0"
+authors = ["Tom Houlé <tom@tomhoule.com>"]
+
+[dependencies]

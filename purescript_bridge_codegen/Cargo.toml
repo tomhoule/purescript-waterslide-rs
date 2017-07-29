@@ -1,0 +1,13 @@
+[package]
+name = "purescript_bridge_codegen"
+version = "0.1.0"
+authors = ["Tom Houlé <tom@tomhoule.com>"]
+
+[dependencies]
+purescript_bridge = { path = "../purescript_bridge" }
+proc-macro2 = "*"
+quote = "*"
+syn = "*"
+
+[lib]
+proc-macro = true

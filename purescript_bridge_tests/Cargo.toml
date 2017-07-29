@@ -1,0 +1,8 @@
+[package]
+name = "purescript_bridge_tests"
+version = "0.1.0"
+authors = ["Tom Houlé <tom@tomhoule.com>"]
+
+[dependencies]
+purescript_bridge = { path = "../purescript_bridge" }
+purescript_bridge_codegen = { path = "../purescript_bridge_codegen" }

@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "purescript_bridge",
+    "purescript_bridge_codegen",
+    "purescript_bridge_tests",
+]
