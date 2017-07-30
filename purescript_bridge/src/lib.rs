@@ -112,7 +112,7 @@ impl Display for PursType {
 
         match *self {
             Struct(Record(ref constructor)) => write!(f, "{}", constructor),
-            Enum(ref name, ref constructors) => {
+            Enum(ref _name, ref constructors) => {
                 for ref constructor in constructors.iter() {
                     write!(f, "{}", constructor)?;
                     write!(f, "| ")?;
@@ -239,7 +239,6 @@ impl PursModule {
 
     pub fn accumulate_imports(imports: &mut BTreeMap<Import, Vec<String>>, type_: &PursType) {
         use PursType::*;
-        use Constructor::*;
 
         match *type_ {
             Struct(ref constructor) => {
@@ -281,7 +280,7 @@ impl Display for PursModule {
                 &PursType::Struct(ref constructor) => {
                     write!(f, "data {} = {}\n\n", constructor.get_name(), constructor)?
                 },
-                &PursType::Enum(ref name, ref constructors) => {
+                &PursType::Enum(ref name, ref _constructors) => {
                     write!(f, "data {} = {}\n\n", name, type_)?
                 }
             }
