@@ -14,7 +14,10 @@
     "purescript-aff": "^3.1.0",
     "purescript-affjax": "^4.0.0",
     "purescript-argonaut-generic": "^1.2.0",
-    "purescript-argonaut-generic-codecs": "^6.0.4"
+    "purescript-argonaut-generic-codecs": "^6.0.4",
+    "purescript-serde-experiment": "https://github.com/tomhoule/purescript-serde-experiment.git",
+    "purescript-partial": "^1.2.1",
+    "purescript-debug": "^3.0.0"
   },
   "devDependencies": {
     "purescript-psci-support": "^3.0.0"

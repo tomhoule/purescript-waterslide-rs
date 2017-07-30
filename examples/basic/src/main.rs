@@ -12,6 +12,7 @@ use std::fs::File;
 use hyper::server::*;
 
 #[derive(ToPursType, Serialize, Deserialize)]
+#[serde(tag = "tag", content = "contents")]
 enum FalafelBasis {
     FavaBean,
     Chickpea,
@@ -38,7 +39,7 @@ impl Service for FalafelServer {
     type Error = hyper::Error;
     type Future = Box<futures::Future<Item=Response, Error=hyper::Error>>;
 
-    fn call(&self, req: Request) -> Self::Future {
+    fn call(&self, _req: Request) -> Self::Future {
         let original = Meal {
             falafels: vec![
                 Falafel {
@@ -48,6 +49,10 @@ impl Service for FalafelServer {
                 Falafel {
                     basis: FalafelBasis::Other(None),
                     parsley_percentage: 8,
+                },
+                Falafel {
+                    basis: FalafelBasis::Other(Some("mango".to_string())),
+                    parsley_percentage: 84,
                 },
             ],
             with_salad: true,
@@ -65,14 +70,18 @@ fn falafel_server() {
 }
 
 fn main() {
+    println!("Generating types...");
     let module = purs_module!("Data.Falafel".to_string() ; Falafel, FalafelBasis, Meal);
-    let mut out = File::create("frontend/src/Data/Falafel.purs").expect("Could not write purescript file");
-    write!(out, "{}", module);
+    println!("Writing types to frontend/src/Data/Falafel.purs...");
+    let mut out = File::create("frontend/src/Data/Falafel.purs").expect("Could not create purescript file");
+    write!(out, "{}", module).expect("Could not write purescript file");
 
     let _guard = ::std::thread::spawn(|| {
+        println!("Starting Rust server");
         falafel_server()
     });
 
+    println!("Building frontend...");
     ::std::process::Command::new("pulp")
         .current_dir("frontend")
         .arg("build")
@@ -83,6 +92,7 @@ fn main() {
         .wait()
         .unwrap();
 
+    println!("Running frontend...");
     ::std::process::Command::new("node")
         .current_dir("frontend")
         .arg("out.js")
