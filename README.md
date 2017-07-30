@@ -30,6 +30,13 @@ fn guten_appetit() {
     let module = purs_module!("Data.Falafel".to_string() : Falafel, FalafelBasis, Meal);
     let expected = "module Data.Falafel where
 
+import Data.Array (
+Array
+)
+import Data.Maybe (
+Maybe
+)
+
 data Falafel = Falafel { basis :: FalafelBasis, parsley_percentage :: Int }
 
 data FalafelBasis = FavaBean | Chickpea | Other (Maybe String)
@@ -54,6 +61,8 @@ For working code, take a look at the `examples` directory.
 Things I want to add in the coming weeks (in no particular order):
 
 - Parametric types (e.g. `Paginated<T>`, or `Option<T>`)
+- Tuple structs
+- Custom auto-importing via container attributes
 - End to end tests to ensure JSON representation are compatible between
   serde_json and argonaut
 - Move the default `ToPursType` implementations to an opt-out feature
