@@ -21,7 +21,7 @@ pub fn derive_purstype(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 
     let expanded = quote! {
         impl ::purescript_bridge::ToPursType for #name {
-            fn to_purs_type() -> PursType {
+            fn to_purs_type() -> ::purescript_bridge::PursType {
                 #to_purs_impl
             }
         }

@@ -48,7 +48,7 @@ data Meal = Meal { falafels :: Array Falafel, with_salad :: bool }
 
 ```
 
-For working code, take a look at the `examples` directory.
+For running code, take a look at the `examples` directory.
 
 ## Features
 

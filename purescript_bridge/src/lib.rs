@@ -134,8 +134,12 @@ impl Display for SeqConstructor {
 impl Display for RecordConstructor {
     fn fmt(&self, f: &mut Formatter) -> ::std::fmt::Result {
         write!(f, "{} {{ ", self.name)?;
-        for &(ref name, ref type_) in self.arguments.iter() {
-            write!(f, "{} :: {}, ", name, type_.get_name())?;
+        for (idx, &(ref name, ref type_)) in self.arguments.iter().enumerate() {
+            write!(f, "{} :: {}", name, type_.get_name())?;
+            if idx < (self.arguments.len() - 1) {
+                write!(f, ",")?;
+            }
+            write!(f, " ")?;
         }
         write!(f, "}}")
     }
@@ -176,8 +180,20 @@ where T: ToPursType
 {
     fn to_purs_type() -> PursType {
         PursType::Struct(Constructor::Seq(SeqConstructor {
-            import: Some(Import { type_module: "Data.Array" }),
+            import: None,
             name: "Array".to_string(),
+            arguments: vec![<T as ToPursType>::to_purs_type()]
+        }))
+    }
+}
+
+impl<T> ToPursType for Option<T>
+where T: ToPursType
+{
+    fn to_purs_type() -> PursType {
+        PursType::Struct(Constructor::Seq(SeqConstructor {
+            import: Some(Import { type_module: "Data.Maybe" }),
+            name: "Maybe".to_string(),
             arguments: vec![<T as ToPursType>::to_purs_type()]
         }))
     }
@@ -224,6 +240,8 @@ macro_rules! purs_primitive_impl {
 
 const PRIM: Import = Import { type_module: "PRIM" };
 
+purs_primitive_impl!(bool, "Boolean", PRIM);
+
 purs_primitive_impl!(i8, "Int", PRIM);
 purs_primitive_impl!(i16, "Int", PRIM);
 purs_primitive_impl!(i32, "Int", PRIM);
@@ -265,6 +283,8 @@ impl PursModule {
     /// you.
     pub fn new(name: String, types: Vec<PursType>) -> Self {
         let mut imports = BTreeMap::new();
+        imports.insert(Import { type_module: "Data.Generic" }, vec!["class Generic".to_string()]);
+
         for type_ in types.iter() {
             Self::accumulate_imports(&mut imports, type_)
         }
@@ -340,10 +360,13 @@ impl Display for PursModule {
             match *type_ {
                 &PursType::Leaf(_, _) => panic!("Leaf types cannot be at the module top-level"),
                 &PursType::Struct(ref constructor) => {
-                    write!(f, "data {} = {}\n\n", constructor.get_name(), constructor)?
+                    let name = constructor.get_name();
+                    write!(f, "data {} = {}\n\n", name, constructor)?;
+                    write!(f, "derive instance generic{} :: Generic {}\n\n", name, name)?;
                 },
                 &PursType::Enum(ref name, ref _constructors) => {
-                    write!(f, "data {} = {}\n\n", name, type_)?
+                    write!(f, "data {} = {}\n\n", name, type_)?;
+                    write!(f, "derive instance generic{} :: Generic {}\n\n", name, name)?;
                 }
             }
         }

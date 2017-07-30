@@ -1,0 +1,15 @@
+[package]
+name = "basic"
+version = "0.1.0"
+authors = ["Tom Houlé <tom@tomhoule.com>"]
+
+[dependencies]
+futures = "*"
+purescript_bridge = { path = "../../purescript_bridge" }
+purescript_bridge_codegen = { path = "../../purescript_bridge_codegen" }
+serde_derive = "*"
+serde = "*"
+serde_json = "*"
+tokio-core = "*"
+tokio-io = "*"
+hyper = "*"

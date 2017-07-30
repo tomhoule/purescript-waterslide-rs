@@ -25,7 +25,7 @@ impl<'a> ToTokens for VariantArguments<'a> {
             let tys = fields.iter().map(|f| &f.ty);
             tokens.append(quote!{
                 vec![
-                    #( <#tys as ToPursType>::to_purs_type()  ),*
+                    #( <#tys as ::purescript_bridge::ToPursType>::to_purs_type()  ),*
                 ]
             })
         } else {
@@ -70,7 +70,7 @@ pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, ()> {
             let variant_names = variants.iter().map(VariantName);
             let variant_arguments = variants.iter().map(VariantArguments);
             Ok(quote! {
-                PursType::Enum(
+                ::purescript_bridge::PursType::Enum(
                     #name.to_string(),
                     vec![
                         #( ::purescript_bridge::Constructor::Seq(
@@ -87,7 +87,7 @@ pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, ()> {
         Body::Struct(VariantData::Struct(ref fields)) => {
             let purs_record_fields = fields.into_iter().map(RecordField);
             Ok(quote! {
-                PursType::Struct(Constructor::Record(RecordConstructor {
+                ::purescript_bridge::PursType::Struct(::purescript_bridge::Constructor::Record(::purescript_bridge::RecordConstructor {
                     import: None,
                     name: #name.to_string(),
                     arguments: vec![
