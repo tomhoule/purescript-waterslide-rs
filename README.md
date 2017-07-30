@@ -1,5 +1,7 @@
 # purescript-waterslide-rs
 
+![logo](purescript_waterslide.jpg)
+
 Wouldn't it be nice if you could share your type definitions between your Rust
 backend and your Purescript app? Now you can!
 
