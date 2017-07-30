@@ -31,6 +31,14 @@ fn module_format() {
     let module = purs_module!("Fruits".to_string() ; Currency, Color, Fruit);
     assert_eq!(
         &format!("{}", &module),
-        "glugluglu"
+        "module Fruits where
+
+data Currency = Coins | Credits | Abolished
+
+data Color = Red Int | Green Int | Blue (Array Int)
+
+data Fruit = Fruit { color :: Color, price :: Int, currency :: Currency, }
+
+"
     );
 }
