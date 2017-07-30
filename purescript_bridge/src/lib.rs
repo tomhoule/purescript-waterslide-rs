@@ -18,27 +18,34 @@ impl ::std::cmp::Ord for Import {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct RecordConstructor {
     pub import: Option<Import>,
     pub name: String,
     pub arguments: Vec<(String, PursType)>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct SeqConstructor {
     pub import: Option<Import>,
     pub name: String,
     pub arguments: Vec<PursType>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Constructor {
     Seq(SeqConstructor),
     Record(RecordConstructor),
 }
 
 impl Constructor {
+    fn get_constructor_name(&self) -> String {
+        match *self {
+            Constructor::Seq(ref c) => c.name.clone(),
+            Constructor::Record(ref c) => c.name.clone(),
+        }
+    }
+
     fn get_import(&self) -> &Option<Import> {
         match *self {
             Constructor::Seq(ref c) => &c.import,
@@ -74,6 +81,13 @@ impl Constructor {
             Constructor::Record(ref c) => format!("{}", c.name),
         }
     }
+
+    fn get_children(&self) -> Vec<PursType> {
+        match *self {
+            Constructor::Seq(ref c) => c.arguments.clone(),
+            Constructor::Record(ref c) => c.arguments.clone().into_iter().map(|(_, arg)| arg).collect(),
+        }
+    }
 }
 
 impl Display for Constructor {
@@ -89,7 +103,7 @@ impl Display for Constructor {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum PursType {
     Struct(Constructor),
     Enum(String, Vec<Constructor>),
@@ -267,21 +281,40 @@ impl PursModule {
         match *type_ {
             Struct(ref constructor) => {
                 if let Some(ref import) = *constructor.get_import() {
-                    let mut value = imports.entry(import.clone()).or_insert_with(|| Vec::new());
-                    value.push(constructor.get_name().clone())
+                    {
+                        let mut value = imports.entry(import.clone()).or_insert_with(|| Vec::new());
+                        let name = constructor.get_constructor_name();
+                        if let None = value.iter().find(|i| **i == name) {
+                            value.push(name.clone());
+                        }
+                    }
+                }
+                for ref inner in constructor.get_children().iter() {
+                    Self::accumulate_imports(imports, inner);
                 }
             },
             Enum(_, ref constructors) => {
                 for ref constructor in constructors.iter() {
                     if let &Some(ref import) = constructor.get_import() {
-                        let mut value = imports.entry(import.clone()).or_insert_with(|| Vec::new());
-                        value.push(constructor.get_name().clone())
+                        {
+                            let mut value = imports.entry(import.clone()).or_insert_with(|| Vec::new());
+                            value.push(constructor.get_constructor_name().clone());
+                            let name = constructor.get_constructor_name();
+                            if let None = value.iter().find(|i| **i == name) {
+                                value.push(name.clone());
+                            }
+                        }
+                    }
+                    for ref inner in constructor.get_children().iter() {
+                        Self::accumulate_imports(imports, inner);
                     }
                 }
             },
             Leaf(ref import, ref name) => {
                 let mut value = imports.entry(import.clone()).or_insert_with(|| Vec::new());
-                value.push(name.clone())
+                if let None = value.iter().find(|i| *i == name) {
+                    value.push(name.clone());
+                }
             }
         }
     }
@@ -292,11 +325,16 @@ impl Display for PursModule {
         write!(f, "module {} where\n\n", self.name)?;
 
         for (key, value) in self.imports.iter() {
+            if key.type_module == "PRIM" {
+                continue
+            }
             write!(f, "import {} (", key.type_module)?;
             for v in value.iter() {
-                write!(f, "{}\n", v)?;
+                write!(f, "\n{}", v)?;
             }
+            write!(f, "\n)\n")?;
         }
+        write!(f, "\n")?;
 
         for ref type_ in self.types.iter() {
             match *type_ {

@@ -33,6 +33,10 @@ fn module_format() {
         &format!("{}", &module),
         "module Fruits where
 
+import Data.Array (
+Array
+)
+
 data Currency = Coins | Credits | Abolished
 
 data Color = Red Int | Green Int | Blue (Array Int)
