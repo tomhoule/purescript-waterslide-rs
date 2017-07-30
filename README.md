@@ -1,58 +1,38 @@
 # purescript-toboggan-rs
 
+Wouldn't it be nice if you could share your type definitions between your Rust
+backend and your Purescript app? Now you can!
+
+Toboggan generates Purescript type definitions from Rust structs and enums. It
+works on stable Rust.
+
+This is a very young project and the code is very much cobbled together at the
+moment, but the basic features are working and the idea is to release early,
+release often.
+
 ## Basic usage
 
-```rust
-#[macro_use] extern crate purescript_bridge_codegen;
-#[macro_use] extern crate purescript_bridge;
+- Derive Purescript representations by annotating your structs and enums with
+  `#[derive(ToPursType)]` or by manually implementing `ToPursType`.
+- Define a module with the `purs_module!` macro.
 
-#[derive(ToPursType)]
-enum FalafelBasis {
-    FavaBean,
-    Chickpea,
-    Other(Option<String>),
-}
+You might want to put the type generation code in a separate binary, which is easy to do with Cargo.
 
-#[derive(ToPursType)]
-struct Falafel {
-    basis: FalafelBasis,
-    parsley_percentage: u8,
-}
+**Important**: on the Purescript side, you want to use the
+`Data.Argonaut.Generic.Aeson` codec to encode and decode the JSON types.
 
-#[derive(ToPursType)]
-struct Meal {
-    falafels: Vec<Falafel>,
-    with_salad: bool,
-}
+**Important\***: on the Rust side, your enums have to be annotated with
+`#[serde(tag = "tag", content = "contents")]`
 
-#[test]
-fn guten_appetit() {
-    let module = purs_module!("Data.Falafel".to_string() : Falafel, FalafelBasis, Meal);
-    let expected = "module Data.Falafel where
+These restrictions may be lifted in the future by the development of an
+Argonaut codec that mirrors `serde_json`'s defaults.
 
-import Data.Array (
-Array
-)
-import Data.Maybe (
-Maybe
-)
-
-data Falafel = Falafel { basis :: FalafelBasis, parsley_percentage :: Int }
-
-data FalafelBasis = FavaBean | Chickpea | Other (Maybe String)
-
-data Meal = Meal { falafels :: Array Falafel, with_salad :: bool }
-";
-    assert_eq!(&format!("{}", &module), expected);
-}
-
-```
-
-For running code, take a look at the `examples` directory.
+For running code, take a look at the [basic example](examples/basic).
 
 ## Features
 
 - Struct and enum definitions that contain structs and enums
+- Support for optional values and collections (`Vec`...)
 - Whole module generation with imports
 - You can define custom representations by manually implementing `ToPursType` (unstable interface, will probably change a lot)
 
@@ -60,19 +40,39 @@ For running code, take a look at the `examples` directory.
 
 Things I want to add in the coming weeks (in no particular order):
 
-- Parametric types (e.g. `Paginated<T>`, or `Option<T>`)
+- Generic types (e.g. `Paginated<T>`, or `Option<T>`, and on top of the already
+  working `Paginated<MyStruct>` or `Option<String>`)
 - Tuple structs
 - Custom auto-importing via container attributes
-- End to end tests to ensure JSON representation are compatible between
-  serde_json and argonaut
+- More end to end tests to ensure JSON representation are compatible between
+  serde_json and argonaut.
 - Move the default `ToPursType` implementations to an opt-out feature
 - Better documentation and examples
 
+## Acknowledgments
+
+The idea of this library came from Haskell's
+[purescript-bridge](https://github.com/eskimor/purescript-bridge) package.
+
 ## Contributing
 
-That would be awesome. There are no particular guidelines for pull requests
-(maybe in the future). We adhere to the (Rust Code of Conduct)[].
+That would be awesome! There are no particular guidelines for pull requests
+(maybe in the future). We adhere to the [Rust Code of
+Conduct](https://www.rust-lang.org/en-US/conduct.html).
 
 ## License
 
-apache + mit blurb here
+Licensed under either of
+
+* Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or
+        http://www.apache.org/licenses/LICENSE-2.0)
+* MIT license ([LICENSE-MIT](LICENSE-MIT) or
+        http://opensource.org/licenses/MIT)
+
+at your option.
+
+### Contribution
+
+Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
+dual licensed as above, without any additional terms or conditions.
