@@ -1,8 +1,8 @@
 #[macro_use]
-extern crate purescript_bridge_codegen;
-extern crate purescript_bridge;
+extern crate purescript_waterslide_codegen;
+extern crate purescript_waterslide;
 
-use purescript_bridge::*;
+use purescript_waterslide::*;
 
 #[test]
 fn plain_old_struct() {

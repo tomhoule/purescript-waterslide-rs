@@ -1,10 +1,10 @@
 [package]
-name = "purescript_bridge_codegen"
+name = "purescript_waterslide_codegen"
 version = "0.1.0"
 authors = ["Tom Houlé <tom@tomhoule.com>"]
 
 [dependencies]
-purescript_bridge = { path = "../purescript_bridge" }
+purescript_waterslide = { path = "../purescript_waterslide" }
 proc-macro2 = "*"
 quote = "*"
 syn = "*"

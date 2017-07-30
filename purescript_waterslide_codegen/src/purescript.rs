@@ -5,7 +5,7 @@ use quote::{Tokens, ToTokens};
 use proc_macro2;
 use proc_macro2::{Delimiter, TokenTree, TokenStream, TokenNode, Term, Literal};
 use std::fmt::{Formatter, Display};
-use purescript_bridge::*;
+use purescript_waterslide::*;
 use std::iter::FromIterator;
 
 struct VariantName<'a>(&'a syn::Variant);
@@ -25,7 +25,7 @@ impl<'a> ToTokens for VariantArguments<'a> {
             let tys = fields.iter().map(|f| &f.ty);
             tokens.append(quote!{
                 vec![
-                    #( <#tys as ::purescript_bridge::ToPursType>::to_purs_type()  ),*
+                    #( <#tys as ::purescript_waterslide::ToPursType>::to_purs_type()  ),*
                 ]
             })
         } else {
@@ -42,7 +42,7 @@ impl<'a> ToTokens for RecordField<'a> {
         let name = self.0.ident.clone().map(|id| format!("{}", id)).unwrap_or("_unknown".to_string());
         let ty = &self.0.ty;
         tokens.append(quote!{
-            (#name.to_string(), <#ty as ::purescript_bridge::ToPursType>::to_purs_type())
+            (#name.to_string(), <#ty as ::purescript_waterslide::ToPursType>::to_purs_type())
         })
     }
 }
@@ -70,11 +70,11 @@ pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, ()> {
             let variant_names = variants.iter().map(VariantName);
             let variant_arguments = variants.iter().map(VariantArguments);
             Ok(quote! {
-                ::purescript_bridge::PursType::Enum(
+                ::purescript_waterslide::PursType::Enum(
                     #name.to_string(),
                     vec![
-                        #( ::purescript_bridge::Constructor::Seq(
-                                ::purescript_bridge::SeqConstructor {
+                        #( ::purescript_waterslide::Constructor::Seq(
+                                ::purescript_waterslide::SeqConstructor {
                                     import: None,
                                     name: #variant_names,
                                     arguments: #variant_arguments,
@@ -87,7 +87,7 @@ pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, ()> {
         Body::Struct(VariantData::Struct(ref fields)) => {
             let purs_record_fields = fields.into_iter().map(RecordField);
             Ok(quote! {
-                ::purescript_bridge::PursType::Struct(::purescript_bridge::Constructor::Record(::purescript_bridge::RecordConstructor {
+                ::purescript_waterslide::PursType::Struct(::purescript_waterslide::Constructor::Record(::purescript_waterslide::RecordConstructor {
                     import: None,
                     name: #name.to_string(),
                     arguments: vec![

@@ -1,9 +1,9 @@
 #[macro_use]
-extern crate purescript_bridge_codegen;
-extern crate purescript_bridge;
+extern crate purescript_waterslide_codegen;
+extern crate purescript_waterslide;
 
 #[macro_use]
-use purescript_bridge::*;
+use purescript_waterslide::*;
 
 #[derive(ToPursType)]
 enum Color {

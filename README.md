@@ -1,9 +1,9 @@
-# purescript-toboggan-rs
+# purescript-waterslide-rs
 
 Wouldn't it be nice if you could share your type definitions between your Rust
 backend and your Purescript app? Now you can!
 
-Toboggan generates Purescript type definitions from Rust structs and enums. It
+Waterslide generates Purescript type definitions from Rust structs and enums. It
 works on stable Rust.
 
 This is a very young project and the code is very much cobbled together at the

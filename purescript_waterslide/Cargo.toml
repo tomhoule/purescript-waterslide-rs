@@ -1,5 +1,5 @@
 [package]
-name = "purescript_bridge"
+name = "purescript_waterslide"
 version = "0.1.0"
 authors = ["Tom Houlé <tom@tomhoule.com>"]
 

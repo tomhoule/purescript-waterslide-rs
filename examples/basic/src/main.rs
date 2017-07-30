@@ -3,10 +3,10 @@ extern crate hyper;
 extern crate serde;
 extern crate serde_json as json;
 #[macro_use] extern crate serde_derive;
-#[macro_use] extern crate purescript_bridge;
-#[macro_use] extern crate purescript_bridge_codegen;
+#[macro_use] extern crate purescript_waterslide;
+#[macro_use] extern crate purescript_waterslide_codegen;
 
-use purescript_bridge::{PursModule, ToPursType};
+use purescript_waterslide::{PursModule, ToPursType};
 use futures::stream::Stream;
 use futures::Future;
 use std::io::prelude::*;

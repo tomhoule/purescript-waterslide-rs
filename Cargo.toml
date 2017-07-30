@@ -1,7 +1,7 @@
 [workspace]
 members = [
     "examples/basic",
-    "purescript_bridge",
-    "purescript_bridge_codegen",
-    "purescript_bridge_tests",
+    "purescript_waterslide",
+    "purescript_waterslide_codegen",
+    "purescript_waterslide_tests",
 ]

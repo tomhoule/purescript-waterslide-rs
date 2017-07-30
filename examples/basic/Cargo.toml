@@ -5,8 +5,8 @@ authors = ["Tom Houlé <tom@tomhoule.com>"]
 
 [dependencies]
 futures = "*"
-purescript_bridge = { path = "../../purescript_bridge" }
-purescript_bridge_codegen = { path = "../../purescript_bridge_codegen" }
+purescript_waterslide = { path = "../../purescript_waterslide" }
+purescript_waterslide_codegen = { path = "../../purescript_waterslide_codegen" }
 serde_derive = "*"
 serde = "*"
 serde_json = "*"
