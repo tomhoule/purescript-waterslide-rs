@@ -27,6 +27,37 @@ fn plain_old_struct() {
 
     assert_eq!(
         &format!("{}", Plain::to_purs_type()),
-        "Plain { age :: Int, name :: String, }"
+        "Plain { age :: Int, name :: String }"
+    );
+}
+
+#[test]
+fn struct_with_option() {
+    #[derive(ToPursType)]
+    struct Anonymous {
+        age: i32,
+        name: Option<String>,
+    }
+
+    assert_eq!(
+        &format!("{}", Anonymous::to_purs_type()),
+        "Anonymous { age :: Int, name :: (Maybe String) }"
+    );
+}
+
+#[test]
+fn struct_with_enum() {
+    #[derive(ToPursType)]
+    enum Color { Yellow(bool), Purple(String) }
+
+    #[derive(ToPursType)]
+    struct Anonymous {
+        age: i32,
+        name: Color,
+    }
+
+    assert_eq!(
+        &format!("{}", Anonymous::to_purs_type()),
+        "Anonymous { age :: Int, name :: Color }"
     );
 }

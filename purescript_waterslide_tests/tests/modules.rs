@@ -33,15 +33,21 @@ fn module_format() {
         &format!("{}", &module),
         "module Fruits where
 
-import Data.Array (
-Array
+import Data.Generic (
+class Generic
 )
 
 data Currency = Coins | Credits | Abolished
 
+derive instance genericCurrency :: Generic Currency
+
 data Color = Red Int | Green Int | Blue (Array Int)
 
-data Fruit = Fruit { color :: Color, price :: Int, currency :: Currency, }
+derive instance genericColor :: Generic Color
+
+data Fruit = Fruit { color :: Color, price :: Int, currency :: Currency }
+
+derive instance genericFruit :: Generic Fruit
 
 "
     );

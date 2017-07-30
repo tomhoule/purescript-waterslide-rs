@@ -39,3 +39,20 @@ fn plain_old_enum() {
         "Doggo | Pupper | Shibe"
     )
 }
+
+#[test]
+fn enum_with_struct_and_option() {
+    #[derive(ToPursType)]
+    struct Topping { ingredient: String };
+
+    #[derive(ToPursType)]
+    enum Dessert {
+        Pie(Topping),
+        IceCream(Option<Topping>)
+    }
+
+    assert_eq!(
+        &format!("{}", Dessert::to_purs_type()),
+        "Pie Topping | IceCream (Maybe Topping)"
+    )
+}
