@@ -101,6 +101,14 @@ fn main() {
     });
 
     println!("Building frontend...");
+    ::std::process::Command::new("bower")
+        .current_dir("frontend")
+        .arg("install")
+        .spawn()
+        .expect("could not build the purescript project")
+        .wait()
+        .unwrap();
+
     ::std::process::Command::new("pulp")
         .current_dir("frontend")
         .arg("build")
