@@ -7,11 +7,13 @@ extern crate serde_json as json;
 #[macro_use] extern crate purescript_bridge_codegen;
 
 use purescript_bridge::{PursModule, ToPursType};
+use futures::stream::Stream;
+use futures::Future;
 use std::io::prelude::*;
 use std::fs::File;
 use hyper::server::*;
 
-#[derive(ToPursType, Serialize, Deserialize)]
+#[derive(Debug, ToPursType, Serialize, Deserialize)]
 #[serde(tag = "tag", content = "contents")]
 enum FalafelBasis {
     FavaBean,
@@ -19,13 +21,13 @@ enum FalafelBasis {
     Other(Option<String>),
 }
 
-#[derive(ToPursType, Serialize, Deserialize)]
+#[derive(Debug, ToPursType, Serialize, Deserialize)]
 struct Falafel {
     basis: FalafelBasis,
     parsley_percentage: u8,
 }
 
-#[derive(Serialize, Deserialize, ToPursType)]
+#[derive(Debug, ToPursType, Serialize, Deserialize)]
 struct Meal {
     falafels: Vec<Falafel>,
     with_salad: bool,
@@ -39,7 +41,7 @@ impl Service for FalafelServer {
     type Error = hyper::Error;
     type Future = Box<futures::Future<Item=Response, Error=hyper::Error>>;
 
-    fn call(&self, _req: Request) -> Self::Future {
+    fn call(&self, req: Request) -> Self::Future {
         let original = Meal {
             falafels: vec![
                 Falafel {
@@ -57,7 +59,24 @@ impl Service for FalafelServer {
             ],
             with_salad: true,
         };
-        Box::new(futures::future::ok(Response::new().with_body(json::to_string(&original).unwrap())))
+
+        match *req.method() {
+            hyper::Method::Post => {
+                Box::new(
+                    req.body()
+                    .fold(Vec::<u8>::new(), |mut vec, chunk| {
+                        vec.extend(&*chunk);
+                        futures::future::ok::<_, hyper::Error>(vec)
+                    })
+                    .map(|bytes| {
+                        let meal = json::from_slice::<Meal>(bytes.as_slice()).expect("could not parse json from frontend");
+                        println!("Rust side:\n{:?}", meal);
+                        Response::new()
+                    })
+                )
+            },
+            _=> Box::new(futures::future::ok(Response::new().with_body(json::to_string(&original).unwrap())))
+        }
     }
 
 }
