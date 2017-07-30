@@ -54,8 +54,6 @@ impl Constructor {
     }
 
     fn get_name(&self) -> String {
-        use std::io::prelude::*;
-
         match *self {
             Constructor::Seq(ref c) => {
                 let mut s = String::new();
