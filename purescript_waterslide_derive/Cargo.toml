@@ -1,5 +1,5 @@
 [package]
-name = "purescript_waterslide_codegen"
+name = "purescript_waterslide_derive"
 version = "0.1.0"
 authors = ["Tom Houlé <tom@tomhoule.com>"]
 

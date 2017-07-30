@@ -4,7 +4,7 @@ extern crate serde;
 extern crate serde_json as json;
 #[macro_use] extern crate serde_derive;
 #[macro_use] extern crate purescript_waterslide;
-#[macro_use] extern crate purescript_waterslide_codegen;
+#[macro_use] extern crate purescript_waterslide_derive;
 
 use purescript_waterslide::{PursModule, ToPursType};
 use futures::stream::Stream;

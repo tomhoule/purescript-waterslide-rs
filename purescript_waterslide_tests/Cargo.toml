@@ -5,4 +5,4 @@ authors = ["Tom Houlé <tom@tomhoule.com>"]
 
 [dependencies]
 purescript_waterslide = { path = "../purescript_waterslide" }
-purescript_waterslide_codegen = { path = "../purescript_waterslide_codegen" }
+purescript_waterslide_derive = { path = "../purescript_waterslide_derive" }
