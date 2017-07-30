@@ -36,6 +36,6 @@ fn plain_old_enum() {
 
     assert_eq!(
         &format!("{}", GoodBoy::to_purs_type()),
-        "Doggo | Pupper | Shibe | "
+        "Doggo | Pupper | Shibe"
     )
 }

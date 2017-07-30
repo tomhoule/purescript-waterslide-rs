@@ -46,10 +46,32 @@ impl Constructor {
         }
     }
 
-    fn get_name(&self) -> &String {
+    fn get_name(&self) -> String {
+        use std::io::prelude::*;
+
         match *self {
-            Constructor::Seq(ref c) => &c.name,
-            Constructor::Record(ref c) => &c.name,
+            Constructor::Seq(ref c) => {
+                let mut s = String::new();
+
+                if !c.arguments.is_empty() {
+                    s.push_str("(");
+                }
+
+                s.push_str(&c.name);
+
+                for ref arg in c.arguments.iter() {
+
+                    s.push(' ');
+                    s.push_str(&arg.get_name());
+                }
+
+                if !c.arguments.is_empty() {
+                    s.push_str(")");
+                }
+
+                s
+            },
+            Constructor::Record(ref c) => format!("{}", c.name),
         }
     }
 }
@@ -75,21 +97,21 @@ pub enum PursType {
 }
 
 impl PursType {
-    fn get_name(&self) -> &String {
+    fn get_name(&self) -> String {
         use PursType::*;
         match *self {
             Struct(ref constructor) => constructor.get_name(),
-            Enum(ref name, _) => name,
-            Leaf(ref _import, ref name) => name,
+            Enum(ref name, _) => format!("{}", name),
+            Leaf(ref _import, ref name) => format!("{}", name),
         }
     }
 }
 
 impl Display for SeqConstructor {
     fn fmt(&self, f: &mut Formatter) -> ::std::fmt::Result {
-        write!(f, "{} ", self.name)?;
+        write!(f, "{}", self.name)?;
         for ref arg in self.arguments.iter() {
-            write!(f, "{}", arg.get_name())?;
+            write!(f, " {}", arg.get_name())?;
         }
         Ok(())
     }
@@ -113,9 +135,11 @@ impl Display for PursType {
         match *self {
             Struct(Record(ref constructor)) => write!(f, "{}", constructor),
             Enum(ref _name, ref constructors) => {
-                for ref constructor in constructors.iter() {
+                for (idx, ref constructor) in constructors.iter().enumerate() {
                     write!(f, "{}", constructor)?;
-                    write!(f, "| ")?;
+                    if idx < constructors.len() - 1 {
+                        write!(f, " | ")?;
+                    }
                 }
                 Ok(())
             }

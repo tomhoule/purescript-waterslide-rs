@@ -9,7 +9,7 @@ use purescript_bridge::*;
 enum Color {
     Red(u8),
     Green(u8),
-    Blue(u8),
+    Blue(Vec<u8>),
 }
 
 #[derive(ToPursType)]
