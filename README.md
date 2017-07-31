@@ -17,8 +17,10 @@ release often.
 - Derive Purescript representations by annotating your structs and enums with
   `#[derive(ToPursType)]` or by manually implementing `ToPursType`.
 - Define a module with the `purs_module!` macro.
+- Print the module to stdout or directly to a file using `PursModule`'s
+  `Display` impl.
 
-You might want to put the type generation code in a separate binary, which is easy to do with Cargo.
+You might want to put the module generation code in a separate binary, which is easy to do with Cargo.
 
 **Important**: on the Purescript side, you want to use the
 `Data.Argonaut.Generic.Aeson` codec to encode and decode the JSON types.
@@ -26,7 +28,7 @@ You might want to put the type generation code in a separate binary, which is ea
 **Important\***: on the Rust side, your enums have to be annotated with
 `#[serde(tag = "tag", content = "contents")]`
 
-These restrictions may be lifted in the future by the development of an
+These restrictions will be lifted in the future by the development of an
 Argonaut codec that mirrors `serde_json`'s defaults.
 
 For running code, take a look at the [basic example](examples/basic).
