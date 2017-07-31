@@ -19,8 +19,24 @@ fn plain_old_struct() {
             import: None,
             name: "Plain".to_string(),
             arguments: vec![
-                ("age".to_string(), PursType::Leaf(Import { type_module: "PRIM" }, "Int".to_string())),
-                ("name".to_string(), PursType::Leaf(Import { type_module: "PRIM" }, "String".to_string())),
+                (
+                    "age".to_string(),
+                    PursType::Leaf(
+                        Import {
+                            type_module: "PRIM",
+                        },
+                        "Int".to_string(),
+                    ),
+                ),
+                (
+                    "name".to_string(),
+                    PursType::Leaf(
+                        Import {
+                            type_module: "PRIM",
+                        },
+                        "String".to_string(),
+                    ),
+                ),
             ],
         }))
     );
@@ -48,7 +64,10 @@ fn struct_with_option() {
 #[test]
 fn struct_with_enum() {
     #[derive(ToPursType)]
-    enum Color { Yellow(bool), Purple(String) }
+    enum Color {
+        Yellow(bool),
+        Purple(String),
+    }
 
     #[derive(ToPursType)]
     struct Anonymous {
