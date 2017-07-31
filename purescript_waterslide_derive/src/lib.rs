@@ -13,7 +13,8 @@ use purescript::make_purs_type;
 #[proc_macro_derive(ToPursType)]
 pub fn derive_purstype(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = input.to_string();
-    let ast = syn::parse_derive_input(&input).expect("Purescript waterslide could not parse input type");
+    let ast =
+        syn::parse_derive_input(&input).expect("Purescript waterslide could not parse input type");
 
     let name = &ast.ident;
 

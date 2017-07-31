@@ -1,5 +1,5 @@
 use std::collections::BTreeMap;
-use std::fmt::{Formatter, Display};
+use std::fmt::{Display, Formatter};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Import {
@@ -75,7 +75,7 @@ impl Constructor {
                 }
 
                 s
-            },
+            }
             Constructor::Record(ref c) => format!("{}", c.name),
         }
     }
@@ -83,7 +83,11 @@ impl Constructor {
     fn get_children(&self) -> Vec<PursType> {
         match *self {
             Constructor::Seq(ref c) => c.arguments.clone(),
-            Constructor::Record(ref c) => c.arguments.clone().into_iter().map(|(_, arg)| arg).collect(),
+            Constructor::Record(ref c) => c.arguments
+                .clone()
+                .into_iter()
+                .map(|(_, arg)| arg)
+                .collect(),
         }
     }
 }
@@ -91,12 +95,8 @@ impl Constructor {
 impl Display for Constructor {
     fn fmt(&self, f: &mut Formatter) -> ::std::fmt::Result {
         match *self {
-            Constructor::Seq(ref c) => {
-                write!(f, "{}", c)
-            },
-            Constructor::Record(ref c) => {
-                write!(f, "{}", c)
-            },
+            Constructor::Seq(ref c) => write!(f, "{}", c),
+            Constructor::Record(ref c) => write!(f, "{}", c),
         }
     }
 }
@@ -162,7 +162,7 @@ impl Display for PursType {
             Leaf(_, ref ty) => {
                 write!(f, "{}", ty)?;
                 Ok(())
-            },
+            }
             _ => unimplemented!(),
         }
     }
@@ -174,52 +174,60 @@ pub trait ToPursType {
 
 
 impl<T> ToPursType for Vec<T>
-where T: ToPursType
+where
+    T: ToPursType,
 {
     fn to_purs_type() -> PursType {
         PursType::Struct(Constructor::Seq(SeqConstructor {
             import: None,
             name: "Array".to_string(),
-            arguments: vec![<T as ToPursType>::to_purs_type()]
+            arguments: vec![<T as ToPursType>::to_purs_type()],
         }))
     }
 }
 
 impl<T> ToPursType for Option<T>
-where T: ToPursType
+where
+    T: ToPursType,
 {
     fn to_purs_type() -> PursType {
         PursType::Struct(Constructor::Seq(SeqConstructor {
-            import: Some(Import { type_module: "Data.Maybe" }),
+            import: Some(Import {
+                type_module: "Data.Maybe",
+            }),
             name: "Maybe".to_string(),
-            arguments: vec![<T as ToPursType>::to_purs_type()]
+            arguments: vec![<T as ToPursType>::to_purs_type()],
         }))
     }
 }
 
 impl<T, U> ToPursType for (T, U)
-where T: ToPursType,
-      U: ToPursType
+where
+    T: ToPursType,
+    U: ToPursType,
 {
     fn to_purs_type() -> PursType {
         PursType::Struct(Constructor::Seq(SeqConstructor {
-            import: Some(Import { type_module: "Data.Tuple" }),
+            import: Some(Import {
+                type_module: "Data.Tuple",
+            }),
             name: "Tuple".to_string(),
             arguments: vec![
                 <T as ToPursType>::to_purs_type(),
-                <U as ToPursType>::to_purs_type()
-            ]
+                <U as ToPursType>::to_purs_type(),
+            ],
         }))
     }
 }
 
-impl ToPursType for ()
-{
+impl ToPursType for () {
     fn to_purs_type() -> PursType {
         PursType::Struct(Constructor::Seq(SeqConstructor {
-            import: Some(Import { type_module: "Prelude" }),
+            import: Some(Import {
+                type_module: "Prelude",
+            }),
             name: "Tuple".to_string(),
-            arguments: vec![]
+            arguments: vec![],
         }))
     }
 }
@@ -236,7 +244,9 @@ macro_rules! purs_primitive_impl {
     }
 }
 
-const PRIM: Import = Import { type_module: "PRIM" };
+const PRIM: Import = Import {
+    type_module: "PRIM",
+};
 
 purs_primitive_impl!(bool, "Boolean", PRIM);
 
@@ -281,7 +291,12 @@ impl PursModule {
     /// you.
     pub fn new(name: String, types: Vec<PursType>) -> Self {
         let mut imports = BTreeMap::new();
-        imports.insert(Import { type_module: "Data.Generic" }, vec!["class Generic".to_string()]);
+        imports.insert(
+            Import {
+                type_module: "Data.Generic",
+            },
+            vec!["class Generic".to_string()],
+        );
 
         for type_ in types.iter() {
             Self::accumulate_imports(&mut imports, type_)
@@ -310,22 +325,20 @@ impl PursModule {
                 for ref inner in constructor.get_children().iter() {
                     Self::accumulate_imports(imports, inner);
                 }
-            },
-            Enum(_, ref constructors) => {
-                for ref constructor in constructors.iter() {
-                    if let &Some(ref import) = constructor.get_import() {
-                        {
-                            let mut value = imports.entry(import.clone()).or_insert_with(|| Vec::new());
-                            value.push(constructor.get_constructor_name().clone());
-                            let name = constructor.get_constructor_name();
-                            if let None = value.iter().find(|i| **i == name) {
-                                value.push(name.clone());
-                            }
+            }
+            Enum(_, ref constructors) => for ref constructor in constructors.iter() {
+                if let &Some(ref import) = constructor.get_import() {
+                    {
+                        let mut value = imports.entry(import.clone()).or_insert_with(|| Vec::new());
+                        value.push(constructor.get_constructor_name().clone());
+                        let name = constructor.get_constructor_name();
+                        if let None = value.iter().find(|i| **i == name) {
+                            value.push(name.clone());
                         }
                     }
-                    for ref inner in constructor.get_children().iter() {
-                        Self::accumulate_imports(imports, inner);
-                    }
+                }
+                for ref inner in constructor.get_children().iter() {
+                    Self::accumulate_imports(imports, inner);
                 }
             },
             Leaf(ref import, ref name) => {
@@ -344,7 +357,7 @@ impl Display for PursModule {
 
         for (key, value) in self.imports.iter() {
             if key.type_module == "PRIM" {
-                continue
+                continue;
             }
             write!(f, "import {} (", key.type_module)?;
             for v in value.iter() {
@@ -361,7 +374,7 @@ impl Display for PursModule {
                     let name = constructor.get_name();
                     write!(f, "data {} = {}\n\n", name, constructor)?;
                     write!(f, "derive instance generic{} :: Generic {}\n\n", name, name)?;
-                },
+                }
                 &PursType::Enum(ref name, ref _constructors) => {
                     write!(f, "data {} = {}\n\n", name, type_)?;
                     write!(f, "derive instance generic{} :: Generic {}\n\n", name, name)?;

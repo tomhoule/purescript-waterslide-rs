@@ -1,10 +1,10 @@
 use syn;
 use syn::{Body, VariantData};
-use syn::{DeriveInput};
-use quote::{Tokens, ToTokens};
+use syn::DeriveInput;
+use quote::{ToTokens, Tokens};
 use proc_macro2;
-use proc_macro2::{Delimiter, TokenTree, TokenStream, TokenNode, Term, Literal};
-use std::fmt::{Formatter, Display};
+use proc_macro2::{Delimiter, Literal, Term, TokenNode, TokenStream, TokenTree};
+use std::fmt::{Display, Formatter};
 use purescript_waterslide::*;
 use std::iter::FromIterator;
 
@@ -39,7 +39,11 @@ struct RecordField<'a>(&'a syn::Field);
 
 impl<'a> ToTokens for RecordField<'a> {
     fn to_tokens(&self, tokens: &mut Tokens) {
-        let name = self.0.ident.clone().map(|id| format!("{}", id)).unwrap_or("_unknown".to_string());
+        let name = self.0
+            .ident
+            .clone()
+            .map(|id| format!("{}", id))
+            .unwrap_or("_unknown".to_string());
         let ty = &self.0.ty;
         tokens.append(quote!{
             (#name.to_string(), <#ty as ::purescript_waterslide::ToPursType>::to_purs_type())
@@ -83,20 +87,24 @@ pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, ()> {
                     ],
                 )
             })
-        },
+        }
         Body::Struct(VariantData::Struct(ref fields)) => {
             let purs_record_fields = fields.into_iter().map(RecordField);
             Ok(quote! {
-                ::purescript_waterslide::PursType::Struct(::purescript_waterslide::Constructor::Record(::purescript_waterslide::RecordConstructor {
-                    import: None,
-                    name: #name.to_string(),
-                    arguments: vec![
-                        #( #purs_record_fields ),*
-                    ],
-                }))
+                ::purescript_waterslide::PursType::Struct(
+                    ::purescript_waterslide::Constructor::Record(
+                        ::purescript_waterslide::RecordConstructor {
+                            import: None,
+                            name: #name.to_string(),
+                            arguments: vec![
+                                #( #purs_record_fields ),*
+                            ],
+                        }
+                    )
+                )
             })
-        },
-        _ => Err(())
+        }
+        _ => Err(()),
     }
 
     // Ok(PursTypeImpl { ident: source.ident.clone(), body: source.body.clone().into() })
