@@ -251,6 +251,19 @@ impl ToPursType for () {
     }
 }
 
+impl<T: ToPursType> ToPursType for Box<T> {
+    fn to_purs_type() -> PursType {
+        T::to_purs_type()
+    }
+}
+
+impl<'a, T: ToPursType> ToPursType for &'a T {
+    fn to_purs_type() -> PursType {
+        T::to_purs_type()
+    }
+}
+
+
 // Make that a feature so people can decide on their impls
 // enabled by default
 macro_rules! purs_primitive_impl {
