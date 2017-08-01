@@ -37,18 +37,17 @@ For running code, take a look at the [basic example](examples/basic).
 
 ## Features
 
-- Struct and enum definitions that contain structs and enums
+- Struct and enum definitions, including tuple structs.
 - Support for optional values and collections (`Vec`...)
 - Whole module generation with imports
-- You can define custom representations by manually implementing `ToPursType` (unstable interface, will probably change a lot)
+- You can define custom representations by manually implementing `ToPursType` (unstable interface)
 
 ### Roadmap
 
 Things I want to add in the coming weeks (in no particular order):
 
-- Generic types (e.g. `Paginated<T>`, or `Option<T>`, and on top of the already
-  working `Paginated<MyStruct>` or `Option<String>`)
-- Tuple structs
+- Generic types (e.g. `Paginated<T>`, or `Paginated a` in Purescript) on top of
+  the already working `Paginated<MyStruct>`)
 - Custom auto-importing via container attributes
 - More end to end tests to ensure JSON representation are compatible between
   serde_json and argonaut.

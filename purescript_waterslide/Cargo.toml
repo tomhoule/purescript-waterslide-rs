@@ -1,6 +1,6 @@
 [package]
 name = "purescript_waterslide"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Tom Houlé <tom@tomhoule.com>"]
 description = "Generate Purescript types from your Rust types"
 homepage = "https://github.com/tomhoule/purescript-waterslide-rs"
