@@ -19,7 +19,10 @@ pub fn derive_purstype(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
     let name = &ast.ident;
     let generics = &ast.generics;
 
-    let to_purs_impl = make_purs_type(&ast).expect("Could not convert the input to Purescript AST");
+    let to_purs_impl = match make_purs_type(&ast) {
+        Ok(generated_impl) => generated_impl,
+        Err(err) => panic!("Could not convert the input to Purescript AST: {:?}", err),
+    };
 
     let expanded = quote! {
         impl#generics ::purescript_waterslide::ToPursType for #name#generics {

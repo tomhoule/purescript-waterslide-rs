@@ -34,6 +34,20 @@ impl<'a> ToTokens for VariantArguments<'a> {
     }
 }
 
+struct TupleField<'a>(&'a syn::Field);
+
+impl<'a> ToTokens for TupleField<'a> {
+    fn to_tokens(&self, tokens: &mut Tokens) {
+        let ty = &self.0.ty;
+        tokens.append(quote!{ <#ty as ::purescript_waterslide::ToPursType>::to_purs_type() })
+        // let tys = self.0.iter().map(|f| &f.ty);
+        // tokens.append(quote!{
+        //     vec![
+        //         #( <#tys as ::purescript_waterslide::ToPursType>::to_purs_type() ),*
+        //     ]
+        // })
+    }
+}
 
 struct RecordField<'a>(&'a syn::Field);
 
@@ -67,7 +81,7 @@ struct EnumImpl {
     constructors: Vec<String>,
 }
 
-pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, ()> {
+pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, String> {
     let name = format!("{}", &source.ident);
     match source.body {
         Body::Enum(ref variants) => {
@@ -103,9 +117,28 @@ pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, ()> {
                     )
                 )
             })
-        }
-        _ => Err(()),
-    }
+        },
+        Body::Struct(VariantData::Tuple(ref fields)) => {
+            let purs_tuple_fields = fields.iter().map(TupleField);
+            Ok(quote! {
+                ::purescript_waterslide::PursType::Enum(
+                    #name.to_string(),
+                    vec![
+                        ::purescript_waterslide::Constructor::Seq(
+                            ::purescript_waterslide::SeqConstructor {
+                                import: None,
+                                name: #name.to_string(),
+                                arguments: vec![
+                                    #( #purs_tuple_fields ),*
+                                ],
+                            }
+                        )
+                    ],
+                )
+            })
+        },
+        Body::Struct(VariantData::Unit) => Err("Unit type".to_string()),
+}
 
     // Ok(PursTypeImpl { ident: source.ident.clone(), body: source.body.clone().into() })
 }
