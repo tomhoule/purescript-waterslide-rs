@@ -40,12 +40,6 @@ impl<'a> ToTokens for TupleField<'a> {
     fn to_tokens(&self, tokens: &mut Tokens) {
         let ty = &self.0.ty;
         tokens.append(quote!{ <#ty as ::purescript_waterslide::ToPursType>::to_purs_type() })
-        // let tys = self.0.iter().map(|f| &f.ty);
-        // tokens.append(quote!{
-        //     vec![
-        //         #( <#tys as ::purescript_waterslide::ToPursType>::to_purs_type() ),*
-        //     ]
-        // })
     }
 }
 
