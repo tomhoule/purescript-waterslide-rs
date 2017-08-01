@@ -79,3 +79,37 @@ fn enum_with_tuples() {
 
     assert_derives_to!(Dessert, "Pie (Tuple Int Int) | Yoghurt (Tuple String Int)")
 }
+
+#[test]
+fn recursive_enum() {
+    #[derive(ToPursType)]
+    enum Node {
+        Branch(Box<Node>),
+        Leaf(i32)
+    }
+
+    assert_eq!(
+        &format!("{}", Node::to_purs_type()),
+        "Branch Node | Leaf Int"
+    );
+}
+
+#[test]
+fn mutually_recursive_types() {
+    #[derive(ToPursType)]
+    struct NumberedNode {
+        number: f32,
+        node: &'static Node,
+    }
+
+    #[derive(ToPursType)]
+    enum Node {
+        Branch(NumberedNode),
+        Leaf(i32)
+    }
+
+    assert_eq!(
+        &format!("{}", Node::to_purs_type()),
+        "Branch Node | Leaf Int"
+    );
+}
