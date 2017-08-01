@@ -17,11 +17,12 @@ pub fn derive_purstype(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
         syn::parse_derive_input(&input).expect("Purescript waterslide could not parse input type");
 
     let name = &ast.ident;
+    let generics = &ast.generics;
 
     let to_purs_impl = make_purs_type(&ast).expect("Could not convert the input to Purescript AST");
 
     let expanded = quote! {
-        impl ::purescript_waterslide::ToPursType for #name {
+        impl#generics ::purescript_waterslide::ToPursType for #name#generics {
             fn to_purs_type() -> ::purescript_waterslide::PursType {
                 #to_purs_impl
             }

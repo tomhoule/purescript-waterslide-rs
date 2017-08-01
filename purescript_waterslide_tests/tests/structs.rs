@@ -80,3 +80,14 @@ fn struct_with_enum() {
         "Anonymous { age :: Int, name :: Color }"
     );
 }
+
+#[test]
+fn struct_with_lifetime() {
+    #[derive(Debug, ToPursType)]
+    struct AString<'a> {
+        the_string: &'a str,
+    }
+
+    let result = AString::to_purs_type();
+    assert_eq!(&format!("{}", result), "AString { the_string :: String }");
+}

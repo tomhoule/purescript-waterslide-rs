@@ -150,6 +150,7 @@ impl Display for PursType {
 
         match *self {
             Struct(Record(ref constructor)) => write!(f, "{}", constructor),
+            Struct(Seq(ref constructor)) => write!(f, "{}", constructor),
             Enum(ref _name, ref constructors) => {
                 for (idx, ref constructor) in constructors.iter().enumerate() {
                     write!(f, "{}", constructor)?;
@@ -158,12 +159,11 @@ impl Display for PursType {
                     }
                 }
                 Ok(())
-            }
+            },
             Leaf(_, ref ty) => {
                 write!(f, "{}", ty)?;
                 Ok(())
-            }
-            _ => unimplemented!(),
+            },
         }
     }
 }
@@ -186,6 +186,18 @@ where
     }
 }
 
+impl<'a, T> ToPursType for &'a [T]
+where T: ToPursType
+{
+    fn to_purs_type() -> PursType {
+        PursType::Struct(Constructor::Seq(SeqConstructor {
+            import: None,
+            name: "Array".to_string(),
+            arguments: vec![<T as ToPursType>::to_purs_type()]
+        }))
+    }
+}
+
 impl<T> ToPursType for Option<T>
 where
     T: ToPursType,
@@ -198,6 +210,13 @@ where
             name: "Maybe".to_string(),
             arguments: vec![<T as ToPursType>::to_purs_type()],
         }))
+    }
+}
+
+impl<'a> ToPursType for &'a str
+{
+    fn to_purs_type() -> PursType {
+        PursType::Leaf(Import { type_module: "PRIM" }, "String".to_string())
     }
 }
 
