@@ -9,7 +9,7 @@ keywords = ["purescript"]
 license = "MIT/Apache-2.0"
 
 [dependencies]
-purescript_waterslide = { path = "../purescript_waterslide", version = "0.1" }
+purescript_waterslide = { path = "../purescript_waterslide" }
 proc-macro2 = "0.1.2"
 quote = "0.3.15"
 syn = "0.11.11"

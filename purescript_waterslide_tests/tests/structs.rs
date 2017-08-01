@@ -82,12 +82,37 @@ fn struct_with_enum() {
 }
 
 #[test]
-fn struct_with_lifetime() {
-    #[derive(Debug, ToPursType)]
-    struct AString<'a> {
-        the_string: &'a str,
-    }
+fn newtype_struct() {
+    #[derive(ToPursType)]
+    struct Email(String);
 
-    let result = AString::to_purs_type();
-    assert_eq!(&format!("{}", result), "AString { the_string :: String }");
+    assert_eq!(
+        &format!("{}", Email::to_purs_type()),
+        "Email String"
+    );
+}
+
+#[test]
+fn tuple_struct() {
+    #[derive(ToPursType)]
+    struct PersonName(String, String);
+
+    assert_eq!(
+        &format!("{}", PersonName::to_purs_type()),
+        "PersonName String String"
+    );
+}
+
+#[test]
+fn tuple_struct_with_modifiers() {
+    #[derive(ToPursType)]
+    struct Node { no: u8 }
+
+    #[derive(ToPursType)]
+    struct Schema(pub &'static [Node]);
+
+    assert_eq!(
+        &format!("{}", Schema::to_purs_type()),
+        "Schema (Array Node)"
+    );
 }
