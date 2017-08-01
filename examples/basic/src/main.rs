@@ -116,6 +116,14 @@ fn main() {
         .wait()
         .unwrap();
 
+    ::std::process::Command::new("npm")
+        .current_dir("frontend")
+        .arg("install")
+        .spawn()
+        .expect("could not build the purescript project")
+        .wait()
+        .unwrap();
+
     ::std::process::Command::new("pulp")
         .current_dir("frontend")
         .arg("build")
