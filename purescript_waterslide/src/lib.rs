@@ -1,6 +1,10 @@
 use std::collections::BTreeMap;
 use std::fmt::{Display, Formatter};
 
+pub mod purs_constructor;
+
+use purs_constructor::*;
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Import {
     pub type_module: &'static str,
@@ -168,10 +172,19 @@ impl Display for PursType {
     }
 }
 
-pub trait ToPursType {
+pub trait ToPursType : ToPursConstructor {
     fn to_purs_type() -> PursType;
 }
 
+impl<T: ToPursConstructor> ToPursConstructor for Vec<T> {
+    fn to_purs_constructor() -> PursConstructor {
+        PursConstructor {
+            name: "Array".to_string(),
+            module: None,
+            parameters: vec![<T as ToPursConstructor>::to_purs_constructor()],
+        }
+    }
+}
 
 impl<T> ToPursType for Vec<T>
 where
@@ -186,6 +199,17 @@ where
     }
 }
 
+impl<'a, T: ToPursConstructor> ToPursConstructor for &'a [T]
+{
+    fn to_purs_constructor() -> PursConstructor {
+        PursConstructor {
+            name: "Array".to_string(),
+            module: None,
+            parameters: vec![<T as ToPursConstructor>::to_purs_constructor()],
+        }
+    }
+}
+
 impl<'a, T> ToPursType for &'a [T]
 where T: ToPursType
 {
@@ -195,6 +219,16 @@ where T: ToPursType
             name: "Array".to_string(),
             arguments: vec![<T as ToPursType>::to_purs_type()]
         }))
+    }
+}
+
+impl<T: ToPursConstructor> ToPursConstructor for Option<T> {
+    fn to_purs_constructor() -> PursConstructor {
+        PursConstructor {
+            name: "Maybe".to_string(),
+            module: Some("Data.Maybe".to_string()),
+            parameters: vec![<T as ToPursConstructor>::to_purs_constructor()],
+        }
     }
 }
 
@@ -213,10 +247,37 @@ where
     }
 }
 
+impl<'a> ToPursConstructor for &'a str {
+    fn to_purs_constructor() -> PursConstructor {
+        PursConstructor {
+            name: "String".to_string(),
+            module: None,
+            parameters: vec![],
+        }
+    }
+}
+
 impl<'a> ToPursType for &'a str
 {
     fn to_purs_type() -> PursType {
         PursType::Leaf(Import { type_module: "PRIM" }, "String".to_string())
+    }
+}
+
+impl<T, U> ToPursConstructor for (T, U)
+    where
+    T: ToPursConstructor,
+    U: ToPursConstructor,
+{
+    fn to_purs_constructor() -> PursConstructor {
+        PursConstructor {
+            name: "Tuple".to_string(),
+            module: Some("Data.Tuple".to_string()),
+            parameters: vec![
+                <T as ToPursConstructor>::to_purs_constructor(),
+                <U as ToPursConstructor>::to_purs_constructor(),
+            ],
+        }
     }
 }
 
@@ -239,21 +300,43 @@ where
     }
 }
 
+impl ToPursConstructor for () {
+    fn to_purs_constructor() -> PursConstructor {
+        PursConstructor {
+            module: Some("Prelude".to_string()),
+            name: "Tuple".to_string(),
+            parameters: vec![],
+        }
+    }
+}
+
 impl ToPursType for () {
     fn to_purs_type() -> PursType {
         PursType::Struct(Constructor::Seq(SeqConstructor {
             import: Some(Import {
                 type_module: "Prelude",
             }),
-            name: "Tuple".to_string(),
+            name: "Unit".to_string(),
             arguments: vec![],
         }))
+    }
+}
+
+impl<T: ToPursConstructor> ToPursConstructor for Box<T> {
+    fn to_purs_constructor() -> PursConstructor {
+        T::to_purs_constructor()
     }
 }
 
 impl<T: ToPursType> ToPursType for Box<T> {
     fn to_purs_type() -> PursType {
         T::to_purs_type()
+    }
+}
+
+impl<'a, T: ToPursConstructor> ToPursConstructor for &'a T {
+    fn to_purs_constructor() -> PursConstructor {
+        T::to_purs_constructor()
     }
 }
 
@@ -268,17 +351,25 @@ impl<'a, T: ToPursType> ToPursType for &'a T {
 // enabled by default
 macro_rules! purs_primitive_impl {
     ($rust_type:ty, $purs_type:expr, $import:expr) => {
+        impl ToPursConstructor for $rust_type {
+            fn to_purs_constructor() -> PursConstructor {
+                PursConstructor {
+                    module: Some($import.to_string()),
+                    name: $purs_type.to_string(),
+                    parameters: vec![],
+                }
+            }
+        }
+
         impl ToPursType for $rust_type {
             fn to_purs_type() -> PursType {
-                PursType::Leaf($import, $purs_type.to_string())
+                PursType::Leaf(Import { type_module: $import }, $purs_type.to_string())
             }
         }
     }
 }
 
-const PRIM: Import = Import {
-    type_module: "PRIM",
-};
+const PRIM: &'static str = "PRIM";
 
 purs_primitive_impl!(bool, "Boolean", PRIM);
 

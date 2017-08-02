@@ -1,5 +1,5 @@
 use syn;
-use syn::{Body, VariantData};
+use syn::{Body, VariantData, Ident};
 use syn::DeriveInput;
 use quote::{ToTokens, Tokens};
 use proc_macro2;
@@ -132,7 +132,19 @@ pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, String> {
             })
         },
         Body::Struct(VariantData::Unit) => Err("Unit type".to_string()),
+    }
 }
 
-    // Ok(PursTypeImpl { ident: source.ident.clone(), body: source.body.clone().into() })
+pub fn make_purs_constructor_impl(ast: &DeriveInput) -> Result<Tokens, String> {
+    let name = format!("{}", &ast.ident);
+    let parameters: Vec<Ident> = ast.generics.ty_params.iter().map(|param| param.ident.clone()).collect();
+    Ok(quote! {
+        ::purescript_waterslide::purs_constructor::PursConstructor {
+            name: #name.to_string(),
+            module: None,
+            parameters: vec![
+                #( <#parameters as ::purescript_waterslide::purs_constructor::ToPursConstructor>::to_purs_constructor() ),*
+            ],
+        }
+    })
 }
