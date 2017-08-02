@@ -4,6 +4,15 @@ extern crate purescript_waterslide;
 
 use purescript_waterslide::*;
 
+macro_rules! assert_derives_to {
+    ($rust_type:ty, $ps_type:expr) => {
+        assert_eq!(
+            &format!("{}", <$rust_type as ToPursType>::to_purs_type()),
+            $ps_type
+        )
+    }
+}
+
 #[test]
 fn plain_old_struct() {
     #[derive(ToPursType)]
@@ -115,4 +124,12 @@ fn tuple_struct_with_modifiers() {
         &format!("{}", Schema::to_purs_type()),
         "Schema (Array Node)"
     );
+}
+
+#[test]
+fn struct_with_tuple_fields() {
+    #[derive(ToPursType)]
+    struct Cow { sides: (u8, u8), milk: bool }
+
+    assert_derives_to!(Cow, "Cow { sides :: (Tuple Int Int), milk :: Boolean }");
 }
