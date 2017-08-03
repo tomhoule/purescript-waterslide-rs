@@ -13,45 +13,49 @@ macro_rules! assert_derives_to {
     }
 }
 
-// #[test]
-// fn plain_old_enum() {
-//     #[derive(ToPursType)]
-//     enum GoodBoy {
-//         Doggo,
-//         Pupper,
-//         Shibe,
-//     }
+#[test]
+fn plain_old_enum() {
+    #[derive(ToPursType)]
+    enum GoodBoy {
+        Doggo,
+        Pupper,
+        Shibe,
+    }
 
-//     assert_eq!(
-//         GoodBoy::to_purs_type(),
-//         // data GoodBoy = Doggo | Pupper | Shibe
-//         PursType::Enum(
-//             "GoodBoy".to_string(),
-//             vec![
-//                 PursConstructor {
-//                     module: None,
-//                     name: "Doggo".to_string(),
-//                     parameters: vec![],
-//                 },
-//                 PursConstructor {
-//                     module: None,
-//                     name: "Pupper".to_string(),
-//                     parameters: vec![],
-//                 },
-//                 PursConstructor {
-//                     module: None,
-//                     name: "Shibe".to_string(),
-//                     parameters: vec![],
-//                 },
-//             ]
-//         )
-//     );
+    assert_eq!(
+        GoodBoy::to_purs_type(),
+        // data GoodBoy = Doggo | Pupper | Shibe
+        PursType::Enum(
+            PursConstructor {
+                name: "GoodBoy".to_string(),
+                module: None,
+                parameters: vec![],
+            },
+            vec![
+                PursConstructor {
+                    module: None,
+                    name: "Doggo".to_string(),
+                    parameters: vec![],
+                },
+                PursConstructor {
+                    module: None,
+                    name: "Pupper".to_string(),
+                    parameters: vec![],
+                },
+                PursConstructor {
+                    module: None,
+                    name: "Shibe".to_string(),
+                    parameters: vec![],
+                },
+            ]
+        )
+    );
 
-//     assert_eq!(
-//         &format!("{}", GoodBoy::to_purs_type()),
-//         "Doggo | Pupper | Shibe"
-//     )
-// }
+    assert_eq!(
+        &format!("{}", GoodBoy::to_purs_type()),
+        "Doggo | Pupper | Shibe"
+    )
+}
 
 #[test]
 fn enum_with_struct_and_option() {
