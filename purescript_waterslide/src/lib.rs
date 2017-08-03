@@ -10,7 +10,6 @@ pub enum PursType {
     Struct(PursConstructor, Vec<(String, PursConstructor)>),
     TupleStruct(PursConstructor, Vec<PursConstructor>),
     Enum(PursConstructor, Vec<PursConstructor>),
-    Leaf(PursConstructor),
 }
 
 impl Display for PursType {
@@ -47,10 +46,6 @@ impl Display for PursType {
                         write!(f, " | ")?;
                     }
                 }
-                Ok(())
-            },
-            Leaf(ref ty) => {
-                write!(f, "{}", ty)?;
                 Ok(())
             },
         }
@@ -231,9 +226,6 @@ impl PursModule {
                         Self::accumulate_imports(&mut imports, &item)
                     }
                 },
-                PursType::Leaf(ref constructor) => {
-                    Self::accumulate_imports(&mut imports, constructor)
-                }
             }
         }
         PursModule {
@@ -278,7 +270,6 @@ impl Display for PursModule {
 
         for ref type_ in self.types.iter() {
             match *type_ {
-                &PursType::Leaf(_) => panic!("Leaf types cannot be at the module top-level"),
                 &PursType::TupleStruct(ref constructor_, ref _fields) => {
                     write!(f, "data {} = {}", constructor_.name, type_)?;
                     write!(f, "derive instance generic{} :: Generic {}\n\n", constructor_.name, constructor_.name)?;
