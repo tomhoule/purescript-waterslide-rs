@@ -13,13 +13,13 @@ pub struct PursConstructor {
 
 impl Display for PursConstructor {
     fn fmt(&self, f: &mut Formatter) -> ::std::fmt::Result {
-        write!(f, "{}", &self.name);
+        write!(f, "{}", &self.name)?;
 
         for ref parameter in self.parameters.iter() {
             if parameter.parameters.is_empty() {
-                write!(f, " {}", &parameter);
+                write!(f, " {}", &parameter)?;
             } else {
-                write!(f, " ({})", parameter);
+                write!(f, " ({})", parameter)?;
             }
         }
 

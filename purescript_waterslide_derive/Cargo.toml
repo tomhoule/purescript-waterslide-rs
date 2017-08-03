@@ -1,6 +1,6 @@
 [package]
 name = "purescript_waterslide_derive"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Tom Houlé <tom@tomhoule.com>"]
 description = "Generate Purescript types from your Rust types (proc macros)"
 homepage = "https://github.com/tomhoule/purescript-waterslide-rs"
