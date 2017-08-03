@@ -2,11 +2,6 @@ use syn;
 use syn::{Body, VariantData, Ident};
 use syn::DeriveInput;
 use quote::{ToTokens, Tokens};
-use proc_macro2;
-use proc_macro2::{Delimiter, Literal, Term, TokenNode, TokenStream, TokenTree};
-use std::fmt::{Display, Formatter};
-use purescript_waterslide::*;
-use std::iter::FromIterator;
 
 struct VariantName<'a>(&'a syn::Variant);
 
@@ -57,22 +52,6 @@ impl<'a> ToTokens for RecordField<'a> {
             (#name.to_string(), <#ty as ::purescript_waterslide::ToPursConstructor>::to_purs_constructor())
         })
     }
-}
-
-// Implements ToPursType recursively by injecting `to_purs_type` calls on every field/variant
-enum ToPursTypeImpl {
-    Enum(EnumImpl),
-    Struct(StructImpl),
-}
-
-struct StructImpl {
-    name: String,
-    constructor: String,
-}
-
-struct EnumImpl {
-    name: String,
-    constructors: Vec<String>,
 }
 
 pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, String> {
