@@ -83,7 +83,7 @@ impl Display for Constructor {
 pub enum PursType {
     Struct(Constructor),
     Enum(String, Vec<Constructor>),
-    Leaf(String),
+    Leaf(PursConstructor),
 }
 
 impl PursType {
@@ -233,7 +233,7 @@ impl<'a> ToPursConstructor for &'a str {
 impl<'a> ToPursType for &'a str
 {
     fn to_purs_type() -> PursType {
-        PursType::Leaf("String".to_string())
+        PursType::Leaf(Self::to_purs_constructor())
     }
 }
 
@@ -330,7 +330,7 @@ macro_rules! purs_primitive_impl {
 
         impl ToPursType for $rust_type {
             fn to_purs_type() -> PursType {
-                PursType::Leaf($purs_type.to_string())
+                PursType::Leaf(<$rust_type as ToPursConstructor>::to_purs_constructor())
             }
         }
     }
