@@ -76,21 +76,20 @@ struct EnumImpl {
 }
 
 pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, String> {
-    let name = format!("{}", &source.ident);
+    let name = &source.ident;
     match source.body {
         Body::Enum(ref variants) => {
             let variant_names = variants.iter().map(VariantName);
             let variant_arguments = variants.iter().map(VariantArguments);
             Ok(quote! {
                 ::purescript_waterslide::PursType::Enum(
-                    #name.to_string(),
+                    <#name as ::purescript_waterslide::ToPursConstructor>::to_purs_constructor(),
                     vec![
-                        #( ::purescript_waterslide::Constructor::Seq(
-                                ::purescript_waterslide::SeqConstructor {
-                                    name: #variant_names,
-                                    arguments: #variant_arguments,
-                                })
-                        ),*
+                        #( ::purescript_waterslide::PursConstructor {
+                            name: #variant_names,
+                            module: None,
+                            parameters: #variant_arguments,
+                        } ),*
                     ],
                 )
             })
@@ -99,31 +98,20 @@ pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, String> {
             let purs_record_fields = fields.into_iter().map(RecordField);
             Ok(quote! {
                 ::purescript_waterslide::PursType::Struct(
-                    ::purescript_waterslide::Constructor::Record(
-                        ::purescript_waterslide::RecordConstructor {
-                            name: #name.to_string(),
-                            arguments: vec![
-                                #( #purs_record_fields ),*
-                            ],
-                        }
-                    )
+                    <#name as ::purescript_waterslide::ToPursConstructor>::to_purs_constructor(),
+                    vec![
+                        #( #purs_record_fields ),*
+                    ],
                 )
             })
         },
         Body::Struct(VariantData::Tuple(ref fields)) => {
             let purs_tuple_fields = fields.iter().map(TupleField);
             Ok(quote! {
-                ::purescript_waterslide::PursType::Enum(
-                    #name.to_string(),
+                ::purescript_waterslide::PursType::TupleStruct(
+                    <#name as ::purescript_waterslide::ToPursConstructor>::to_purs_constructor(),
                     vec![
-                        ::purescript_waterslide::Constructor::Seq(
-                            ::purescript_waterslide::SeqConstructor {
-                                name: #name.to_string(),
-                                arguments: vec![
-                                    #( #purs_tuple_fields ),*
-                                ],
-                            }
-                        )
+                        #( #purs_tuple_fields ),*
                     ],
                 )
             })

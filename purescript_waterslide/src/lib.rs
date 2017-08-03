@@ -70,19 +70,11 @@ impl Constructor {
     }
 }
 
-impl Display for Constructor {
-    fn fmt(&self, f: &mut Formatter) -> ::std::fmt::Result {
-        match *self {
-            Constructor::Seq(ref c) => write!(f, "{}", c),
-            Constructor::Record(ref c) => write!(f, "{}", c),
-        }
-    }
-}
-
 #[derive(Clone, Debug, PartialEq)]
 pub enum PursType {
-    Struct(Constructor),
-    Enum(String, Vec<Constructor>),
+    Struct(PursConstructor, Vec<(String, PursConstructor)>),
+    TupleStruct(PursConstructor, Vec<PursConstructor>),
+    Enum(PursConstructor, Vec<PursConstructor>),
     Leaf(PursConstructor),
 }
 
@@ -90,38 +82,11 @@ impl PursType {
     fn get_name(&self) -> String {
         use PursType::*;
         match *self {
-            Struct(ref constructor) => constructor.get_name(),
-            Enum(ref name, _) => format!("{}", name),
-            Leaf(ref name) => format!("{}", name),
+            Struct(ref constructor, _) => format!("{}", constructor.name),
+            TupleStruct(ref constructor, _) => format!("{}", constructor.name),
+            Enum(ref constructor, _) => format!("{}", constructor.name),
+            Leaf(ref constructor) => format!("{}", constructor.name),
         }
-    }
-}
-
-impl Display for SeqConstructor {
-    fn fmt(&self, f: &mut Formatter) -> ::std::fmt::Result {
-        write!(f, "{}", self.name)?;
-        for ref arg in self.arguments.iter() {
-            if arg.parameters.is_empty() {
-                write!(f, " {}", arg)?;
-            } else {
-                write!(f, " ({})", arg)?;
-            }
-        }
-        Ok(())
-    }
-}
-
-impl Display for RecordConstructor {
-    fn fmt(&self, f: &mut Formatter) -> ::std::fmt::Result {
-        write!(f, "{} {{ ", self.name)?;
-        for (idx, &(ref name, ref type_)) in self.arguments.iter().enumerate() {
-            write!(f, "{} :: {}", name, &type_)?;
-            if idx < (self.arguments.len() - 1) {
-                write!(f, ",")?;
-            }
-            write!(f, " ")?;
-        }
-        write!(f, "}}")
     }
 }
 
@@ -131,8 +96,28 @@ impl Display for PursType {
         use Constructor::*;
 
         match *self {
-            Struct(Record(ref constructor)) => write!(f, "{}", constructor),
-            Struct(Seq(ref constructor)) => write!(f, "{}", constructor),
+            Struct(ref type_, ref fields) => {
+                write!(f, "{} {{ ", type_.name)?;
+                for (idx, &(ref name, ref constructor)) in fields.iter().enumerate() {
+                    write!(f, "{} :: {}", name, constructor)?;
+                    if idx < (fields.len() - 1) {
+                        write!(f, ",")?;
+                    }
+                    write!(f, " ")?;
+                }
+                write!(f, "}}")
+            },
+            TupleStruct(ref type_, ref fields) => {
+                write!(f, "{}", type_.name)?;
+                for ref field in fields.iter() {
+                    if field.parameters.is_empty() {
+                        write!(f, " {}", field)?;
+                    } else {
+                        write!(f, " ({})", field)?;
+                    }
+                }
+                Ok(())
+            },
             Enum(ref _name, ref constructors) => {
                 for (idx, ref constructor) in constructors.iter().enumerate() {
                     write!(f, "{}", constructor)?;
@@ -169,10 +154,7 @@ where
     T: ToPursType,
 {
     fn to_purs_type() -> PursType {
-        PursType::Struct(Constructor::Seq(SeqConstructor {
-            name: "Array".to_string(),
-            arguments: vec![<T as ToPursConstructor>::to_purs_constructor()],
-        }))
+        PursType::Leaf(Self::to_purs_constructor())
     }
 }
 
@@ -188,13 +170,10 @@ impl<'a, T: ToPursConstructor> ToPursConstructor for &'a [T]
 }
 
 impl<'a, T> ToPursType for &'a [T]
-where T: ToPursType
+where T: ToPursType + 'a
 {
     fn to_purs_type() -> PursType {
-        PursType::Struct(Constructor::Seq(SeqConstructor {
-            name: "Array".to_string(),
-            arguments: vec![<T as ToPursConstructor>::to_purs_constructor()]
-        }))
+        PursType::Leaf(Self::to_purs_constructor())
     }
 }
 
@@ -213,10 +192,7 @@ where
     T: ToPursType,
 {
     fn to_purs_type() -> PursType {
-        PursType::Struct(Constructor::Seq(SeqConstructor {
-            name: "Maybe".to_string(),
-            arguments: vec![<T as ToPursConstructor>::to_purs_constructor()],
-        }))
+        PursType::Leaf(Self::to_purs_constructor())
     }
 }
 
@@ -260,13 +236,7 @@ where
     U: ToPursType,
 {
     fn to_purs_type() -> PursType {
-        PursType::Struct(Constructor::Seq(SeqConstructor {
-            name: "Tuple".to_string(),
-            arguments: vec![
-                <T as ToPursConstructor>::to_purs_constructor(),
-                <U as ToPursConstructor>::to_purs_constructor(),
-            ],
-        }))
+        PursType::Leaf(Self::to_purs_constructor())
     }
 }
 
@@ -282,10 +252,7 @@ impl ToPursConstructor for () {
 
 impl ToPursType for () {
     fn to_purs_type() -> PursType {
-        PursType::Struct(Constructor::Seq(SeqConstructor {
-            name: "Unit".to_string(),
-            arguments: vec![],
-        }))
+        PursType::Leaf(Self::to_purs_constructor())
     }
 }
 
@@ -388,21 +355,34 @@ impl PursModule {
 
         for type_ in types.iter() {
             match *type_ {
-                PursType::Struct(ref c) => {
-                    c.get_children()
+                PursType::Struct(ref name, ref fields) => {
+                    Self::accumulate_imports(&mut imports, name);
+
+                    fields
+                        .iter()
+                        .map(|&(ref _field_name, ref constr)| {
+                            Self::accumulate_imports(&mut imports, &constr)
+                        });
+                },
+                PursType::TupleStruct(ref name, ref fields) => {
+                    Self::accumulate_imports(&mut imports, name);
+
+                    fields
                         .iter()
                         .map(|constr| {
                             Self::accumulate_imports(&mut imports, constr)
                         });
                 },
-                PursType::Enum(_, ref c) => {
+                PursType::Enum(ref name, ref c) => {
+                    Self::accumulate_imports(&mut imports, name);
+
                     for item in c.iter() {
-                        for constructor in item.get_children().iter() {
-                            Self::accumulate_imports(&mut imports, &constructor)
-                        }
+                        Self::accumulate_imports(&mut imports, &item)
                     }
                 },
-                PursType::Leaf(_) => ()
+                PursType::Leaf(ref constructor) => {
+                    Self::accumulate_imports(&mut imports, constructor)
+                }
             }
         }
         PursModule {
@@ -420,46 +400,13 @@ impl PursModule {
                 value.push(type_.name.clone())
             }
         }
-    }
 
-        // match *type_ {
-        //     Struct(ref constructor) => {
-        //         if let Some(ref import) = *constructor.get_import() {
-        //             {
-        //                 let mut value = imports.entry(import.clone()).or_insert_with(|| Vec::new());
-        //                 let name = constructor.get_constructor_name();
-        //                 if let None = value.iter().find(|i| **i == name) {
-        //                     value.push(name.clone());
-        //                 }
-        //             }
-        //         }
-        //         for ref inner in constructor.get_children().iter() {
-        //             Self::accumulate_imports(imports, inner);
-        //         }
-        //     }
-        //     Enum(_, ref constructors) => for ref constructor in constructors.iter() {
-        //         if let &Some(ref import) = constructor.get_import() {
-        //             {
-        //                 let mut value = imports.entry(import.clone()).or_insert_with(|| Vec::new());
-        //                 value.push(constructor.get_constructor_name().clone());
-        //                 let name = constructor.get_constructor_name();
-        //                 if let None = value.iter().find(|i| **i == name) {
-        //                     value.push(name.clone());
-        //                 }
-        //             }
-        //         }
-        //         for ref inner in constructor.get_children().iter() {
-        //             Self::accumulate_imports(imports, inner);
-        //         }
-        //     },
-        //     Leaf(ref import, ref name) => {
-        //         let mut value = imports.entry(import.type_module.clone()).or_insert_with(|| Vec::new());
-        //         if let None = value.iter().find(|i| *i == name) {
-        //             value.push(name.clone());
-        //         }
-        //     }
-        // }
-    // }
+        for ref param in type_.parameters.iter() {
+            Self::accumulate_imports(imports, &param)
+        }
+
+        println!("{:?}", imports);
+    }
 }
 
 impl Display for PursModule {
@@ -481,14 +428,17 @@ impl Display for PursModule {
         for ref type_ in self.types.iter() {
             match *type_ {
                 &PursType::Leaf(_) => panic!("Leaf types cannot be at the module top-level"),
-                &PursType::Struct(ref constructor) => {
-                    let name = constructor.get_name();
-                    write!(f, "data {} = {}\n\n", name, constructor)?;
-                    write!(f, "derive instance generic{} :: Generic {}\n\n", name, name)?;
+                &PursType::TupleStruct(ref constructor_, ref _fields) => {
+                    write!(f, "data {} = {}", constructor_.name, type_)?;
+                    write!(f, "derive instance generic{} :: Generic {}\n\n", constructor_.name, constructor_.name)?;
+                },
+                &PursType::Struct(ref constructor, ref _fields) => {
+                    write!(f, "data {} = {}\n\n", constructor.name, type_)?;
+                    write!(f, "derive instance generic{} :: Generic {}\n\n", constructor.name, constructor.name)?;
                 }
                 &PursType::Enum(ref name, ref _constructors) => {
-                    write!(f, "data {} = {}\n\n", name, type_)?;
-                    write!(f, "derive instance generic{} :: Generic {}\n\n", name, name)?;
+                    write!(f, "data {} = {}\n\n", name.name, type_)?;
+                    write!(f, "derive instance generic{} :: Generic {}\n\n", name.name, name.name)?;
                 }
             }
         }
