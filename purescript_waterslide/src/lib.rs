@@ -71,15 +71,6 @@ impl<T: ToPursConstructor> ToPursConstructor for Vec<T> {
     }
 }
 
-impl<T> ToPursType for Vec<T>
-where
-    T: ToPursType,
-{
-    fn to_purs_type() -> PursType {
-        PursType::Leaf(Self::to_purs_constructor())
-    }
-}
-
 impl<'a, T: ToPursConstructor> ToPursConstructor for &'a [T]
 {
     fn to_purs_constructor() -> PursConstructor {
@@ -88,14 +79,6 @@ impl<'a, T: ToPursConstructor> ToPursConstructor for &'a [T]
             module: None,
             parameters: vec![<T as ToPursConstructor>::to_purs_constructor()],
         }
-    }
-}
-
-impl<'a, T> ToPursType for &'a [T]
-where T: ToPursType + 'a
-{
-    fn to_purs_type() -> PursType {
-        PursType::Leaf(Self::to_purs_constructor())
     }
 }
 
@@ -109,15 +92,6 @@ impl<T: ToPursConstructor> ToPursConstructor for Option<T> {
     }
 }
 
-impl<T> ToPursType for Option<T>
-where
-    T: ToPursType,
-{
-    fn to_purs_type() -> PursType {
-        PursType::Leaf(Self::to_purs_constructor())
-    }
-}
-
 impl<'a> ToPursConstructor for &'a str {
     fn to_purs_constructor() -> PursConstructor {
         PursConstructor {
@@ -125,13 +99,6 @@ impl<'a> ToPursConstructor for &'a str {
             module: None,
             parameters: vec![],
         }
-    }
-}
-
-impl<'a> ToPursType for &'a str
-{
-    fn to_purs_type() -> PursType {
-        PursType::Leaf(Self::to_purs_constructor())
     }
 }
 
@@ -152,16 +119,6 @@ impl<T, U> ToPursConstructor for (T, U)
     }
 }
 
-impl<T, U> ToPursType for (T, U)
-where
-    T: ToPursType,
-    U: ToPursType,
-{
-    fn to_purs_type() -> PursType {
-        PursType::Leaf(Self::to_purs_constructor())
-    }
-}
-
 impl ToPursConstructor for () {
     fn to_purs_constructor() -> PursConstructor {
         PursConstructor {
@@ -172,33 +129,15 @@ impl ToPursConstructor for () {
     }
 }
 
-impl ToPursType for () {
-    fn to_purs_type() -> PursType {
-        PursType::Leaf(Self::to_purs_constructor())
-    }
-}
-
 impl<T: ToPursConstructor> ToPursConstructor for Box<T> {
     fn to_purs_constructor() -> PursConstructor {
         T::to_purs_constructor()
     }
 }
 
-impl<T: ToPursType> ToPursType for Box<T> {
-    fn to_purs_type() -> PursType {
-        T::to_purs_type()
-    }
-}
-
 impl<'a, T: ToPursConstructor> ToPursConstructor for &'a T {
     fn to_purs_constructor() -> PursConstructor {
         T::to_purs_constructor()
-    }
-}
-
-impl<'a, T: ToPursType> ToPursType for &'a T {
-    fn to_purs_type() -> PursType {
-        T::to_purs_type()
     }
 }
 
@@ -214,12 +153,6 @@ macro_rules! purs_primitive_impl {
                     name: $purs_type.to_string(),
                     parameters: vec![],
                 }
-            }
-        }
-
-        impl ToPursType for $rust_type {
-            fn to_purs_type() -> PursType {
-                PursType::Leaf(<$rust_type as ToPursConstructor>::to_purs_constructor())
             }
         }
     }
