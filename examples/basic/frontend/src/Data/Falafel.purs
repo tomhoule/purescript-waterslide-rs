@@ -15,7 +15,7 @@ data FalafelBasis = FavaBean | Chickpea | Other (Maybe String)
 
 derive instance genericFalafelBasis :: Generic FalafelBasis
 
-data Meal = Meal { falafels :: (Array Falafel), with_salad :: Boolean }
+data Meal = Meal { falafels :: Array Falafel, with_salad :: Boolean }
 
 derive instance genericMeal :: Generic Meal
 

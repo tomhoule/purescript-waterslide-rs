@@ -3,7 +3,7 @@ use std::fmt::{Display, Formatter};
 
 pub mod purs_constructor;
 
-use purs_constructor::*;
+pub use purs_constructor::*;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Import {
@@ -26,14 +26,14 @@ impl ::std::cmp::Ord for Import {
 pub struct RecordConstructor {
     pub import: Option<Import>,
     pub name: String,
-    pub arguments: Vec<(String, PursType)>,
+    pub arguments: Vec<(String, PursConstructor)>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct SeqConstructor {
     pub import: Option<Import>,
     pub name: String,
-    pub arguments: Vec<PursType>,
+    pub arguments: Vec<PursConstructor>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -71,7 +71,7 @@ impl Constructor {
                 for ref arg in c.arguments.iter() {
 
                     s.push(' ');
-                    s.push_str(&arg.get_name());
+                    s.push_str(&arg.name);
                 }
 
                 if !c.arguments.is_empty() {
@@ -84,7 +84,7 @@ impl Constructor {
         }
     }
 
-    fn get_children(&self) -> Vec<PursType> {
+    fn get_children(&self) -> Vec<PursConstructor> {
         match *self {
             Constructor::Seq(ref c) => c.arguments.clone(),
             Constructor::Record(ref c) => c.arguments
@@ -127,7 +127,11 @@ impl Display for SeqConstructor {
     fn fmt(&self, f: &mut Formatter) -> ::std::fmt::Result {
         write!(f, "{}", self.name)?;
         for ref arg in self.arguments.iter() {
-            write!(f, " {}", arg.get_name())?;
+            if arg.parameters.is_empty() {
+                write!(f, " {}", arg)?;
+            } else {
+                write!(f, " ({})", arg)?;
+            }
         }
         Ok(())
     }
@@ -137,7 +141,7 @@ impl Display for RecordConstructor {
     fn fmt(&self, f: &mut Formatter) -> ::std::fmt::Result {
         write!(f, "{} {{ ", self.name)?;
         for (idx, &(ref name, ref type_)) in self.arguments.iter().enumerate() {
-            write!(f, "{} :: {}", name, type_.get_name())?;
+            write!(f, "{} :: {}", name, &type_)?;
             if idx < (self.arguments.len() - 1) {
                 write!(f, ",")?;
             }
@@ -194,7 +198,7 @@ where
         PursType::Struct(Constructor::Seq(SeqConstructor {
             import: None,
             name: "Array".to_string(),
-            arguments: vec![<T as ToPursType>::to_purs_type()],
+            arguments: vec![<T as ToPursConstructor>::to_purs_constructor()],
         }))
     }
 }
@@ -217,7 +221,7 @@ where T: ToPursType
         PursType::Struct(Constructor::Seq(SeqConstructor {
             import: None,
             name: "Array".to_string(),
-            arguments: vec![<T as ToPursType>::to_purs_type()]
+            arguments: vec![<T as ToPursConstructor>::to_purs_constructor()]
         }))
     }
 }
@@ -242,7 +246,7 @@ where
                 type_module: "Data.Maybe",
             }),
             name: "Maybe".to_string(),
-            arguments: vec![<T as ToPursType>::to_purs_type()],
+            arguments: vec![<T as ToPursConstructor>::to_purs_constructor()],
         }))
     }
 }
@@ -293,8 +297,8 @@ where
             }),
             name: "Tuple".to_string(),
             arguments: vec![
-                <T as ToPursType>::to_purs_type(),
-                <U as ToPursType>::to_purs_type(),
+                <T as ToPursConstructor>::to_purs_constructor(),
+                <U as ToPursConstructor>::to_purs_constructor(),
             ],
         }))
     }
@@ -393,7 +397,7 @@ purs_primitive_impl!(String, "String", PRIM);
 #[derive(Debug)]
 pub struct PursModule {
     name: String,
-    imports: BTreeMap<Import, Vec<String>>,
+    imports: BTreeMap<String, Vec<String>>,
     types: Vec<PursType>,
 }
 
@@ -415,14 +419,28 @@ impl PursModule {
     pub fn new(name: String, types: Vec<PursType>) -> Self {
         let mut imports = BTreeMap::new();
         imports.insert(
-            Import {
-                type_module: "Data.Generic",
-            },
+            "Data.Generic".to_string(),
             vec!["class Generic".to_string()],
         );
 
         for type_ in types.iter() {
-            Self::accumulate_imports(&mut imports, type_)
+            match *type_ {
+                PursType::Struct(ref c) => {
+                    c.get_children()
+                        .iter()
+                        .map(|constr| {
+                            Self::accumulate_imports(&mut imports, constr)
+                        });
+                },
+                PursType::Enum(_, ref c) => {
+                    for item in c.iter() {
+                        for constructor in item.get_children().iter() {
+                            Self::accumulate_imports(&mut imports, &constructor)
+                        }
+                    }
+                },
+                PursType::Leaf(_, _) => ()
+            }
         }
         PursModule {
             name,
@@ -431,47 +449,54 @@ impl PursModule {
         }
     }
 
-    pub fn accumulate_imports(imports: &mut BTreeMap<Import, Vec<String>>, type_: &PursType) {
-        use PursType::*;
-
-        match *type_ {
-            Struct(ref constructor) => {
-                if let Some(ref import) = *constructor.get_import() {
-                    {
-                        let mut value = imports.entry(import.clone()).or_insert_with(|| Vec::new());
-                        let name = constructor.get_constructor_name();
-                        if let None = value.iter().find(|i| **i == name) {
-                            value.push(name.clone());
-                        }
-                    }
-                }
-                for ref inner in constructor.get_children().iter() {
-                    Self::accumulate_imports(imports, inner);
-                }
-            }
-            Enum(_, ref constructors) => for ref constructor in constructors.iter() {
-                if let &Some(ref import) = constructor.get_import() {
-                    {
-                        let mut value = imports.entry(import.clone()).or_insert_with(|| Vec::new());
-                        value.push(constructor.get_constructor_name().clone());
-                        let name = constructor.get_constructor_name();
-                        if let None = value.iter().find(|i| **i == name) {
-                            value.push(name.clone());
-                        }
-                    }
-                }
-                for ref inner in constructor.get_children().iter() {
-                    Self::accumulate_imports(imports, inner);
-                }
-            },
-            Leaf(ref import, ref name) => {
-                let mut value = imports.entry(import.clone()).or_insert_with(|| Vec::new());
-                if let None = value.iter().find(|i| *i == name) {
-                    value.push(name.clone());
-                }
+    pub fn accumulate_imports(imports: &mut BTreeMap<String, Vec<String>>, type_: &PursConstructor) {
+        if let Some(ref import) = type_.module {
+            let mut value = imports.entry(import.clone())
+                .or_insert_with(|| Vec::new());
+            if let None = value.iter().find(|i| **i == type_.name) {
+                value.push(type_.name.clone())
             }
         }
     }
+
+        // match *type_ {
+        //     Struct(ref constructor) => {
+        //         if let Some(ref import) = *constructor.get_import() {
+        //             {
+        //                 let mut value = imports.entry(import.clone()).or_insert_with(|| Vec::new());
+        //                 let name = constructor.get_constructor_name();
+        //                 if let None = value.iter().find(|i| **i == name) {
+        //                     value.push(name.clone());
+        //                 }
+        //             }
+        //         }
+        //         for ref inner in constructor.get_children().iter() {
+        //             Self::accumulate_imports(imports, inner);
+        //         }
+        //     }
+        //     Enum(_, ref constructors) => for ref constructor in constructors.iter() {
+        //         if let &Some(ref import) = constructor.get_import() {
+        //             {
+        //                 let mut value = imports.entry(import.clone()).or_insert_with(|| Vec::new());
+        //                 value.push(constructor.get_constructor_name().clone());
+        //                 let name = constructor.get_constructor_name();
+        //                 if let None = value.iter().find(|i| **i == name) {
+        //                     value.push(name.clone());
+        //                 }
+        //             }
+        //         }
+        //         for ref inner in constructor.get_children().iter() {
+        //             Self::accumulate_imports(imports, inner);
+        //         }
+        //     },
+        //     Leaf(ref import, ref name) => {
+        //         let mut value = imports.entry(import.type_module.clone()).or_insert_with(|| Vec::new());
+        //         if let None = value.iter().find(|i| *i == name) {
+        //             value.push(name.clone());
+        //         }
+        //     }
+        // }
+    // }
 }
 
 impl Display for PursModule {
@@ -479,10 +504,10 @@ impl Display for PursModule {
         write!(f, "module {} where\n\n", self.name)?;
 
         for (key, value) in self.imports.iter() {
-            if key.type_module == "PRIM" {
+            if key == "PRIM" {
                 continue;
             }
-            write!(f, "import {} (", key.type_module)?;
+            write!(f, "import {} (", key)?;
             for v in value.iter() {
                 write!(f, "\n{}", v)?;
             }

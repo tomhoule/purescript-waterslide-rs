@@ -25,7 +25,7 @@ impl<'a> ToTokens for VariantArguments<'a> {
             let tys = fields.iter().map(|f| &f.ty);
             tokens.append(quote!{
                 vec![
-                    #( <#tys as ::purescript_waterslide::ToPursType>::to_purs_type()  ),*
+                    #( <#tys as ::purescript_waterslide::ToPursConstructor>::to_purs_constructor()  ),*
                 ]
             })
         } else {
@@ -39,7 +39,7 @@ struct TupleField<'a>(&'a syn::Field);
 impl<'a> ToTokens for TupleField<'a> {
     fn to_tokens(&self, tokens: &mut Tokens) {
         let ty = &self.0.ty;
-        tokens.append(quote!{ <#ty as ::purescript_waterslide::ToPursType>::to_purs_type() })
+        tokens.append(quote!{ <#ty as ::purescript_waterslide::ToPursConstructor>::to_purs_constructor() })
     }
 }
 
@@ -54,7 +54,7 @@ impl<'a> ToTokens for RecordField<'a> {
             .unwrap_or("_unknown".to_string());
         let ty = &self.0.ty;
         tokens.append(quote!{
-            (#name.to_string(), <#ty as ::purescript_waterslide::ToPursType>::to_purs_type())
+            (#name.to_string(), <#ty as ::purescript_waterslide::ToPursConstructor>::to_purs_constructor())
         })
     }
 }
