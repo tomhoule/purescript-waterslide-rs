@@ -5,33 +5,14 @@ pub mod purs_constructor;
 
 pub use purs_constructor::*;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Import {
-    pub type_module: &'static str,
-}
-
-impl ::std::cmp::PartialOrd for Import {
-    fn partial_cmp(&self, other: &Import) -> Option<::std::cmp::Ordering> {
-        self.type_module.partial_cmp(other.type_module)
-    }
-}
-
-impl ::std::cmp::Ord for Import {
-    fn cmp(&self, other: &Import) -> ::std::cmp::Ordering {
-        self.type_module.cmp(other.type_module)
-    }
-}
-
 #[derive(Clone, Debug, PartialEq)]
 pub struct RecordConstructor {
-    pub import: Option<Import>,
     pub name: String,
     pub arguments: Vec<(String, PursConstructor)>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct SeqConstructor {
-    pub import: Option<Import>,
     pub name: String,
     pub arguments: Vec<PursConstructor>,
 }
@@ -47,13 +28,6 @@ impl Constructor {
         match *self {
             Constructor::Seq(ref c) => c.name.clone(),
             Constructor::Record(ref c) => c.name.clone(),
-        }
-    }
-
-    fn get_import(&self) -> &Option<Import> {
-        match *self {
-            Constructor::Seq(ref c) => &c.import,
-            Constructor::Record(ref c) => &c.import,
         }
     }
 
@@ -109,7 +83,7 @@ impl Display for Constructor {
 pub enum PursType {
     Struct(Constructor),
     Enum(String, Vec<Constructor>),
-    Leaf(Import, String),
+    Leaf(String),
 }
 
 impl PursType {
@@ -118,7 +92,7 @@ impl PursType {
         match *self {
             Struct(ref constructor) => constructor.get_name(),
             Enum(ref name, _) => format!("{}", name),
-            Leaf(ref _import, ref name) => format!("{}", name),
+            Leaf(ref name) => format!("{}", name),
         }
     }
 }
@@ -168,7 +142,7 @@ impl Display for PursType {
                 }
                 Ok(())
             },
-            Leaf(_, ref ty) => {
+            Leaf(ref ty) => {
                 write!(f, "{}", ty)?;
                 Ok(())
             },
@@ -196,7 +170,6 @@ where
 {
     fn to_purs_type() -> PursType {
         PursType::Struct(Constructor::Seq(SeqConstructor {
-            import: None,
             name: "Array".to_string(),
             arguments: vec![<T as ToPursConstructor>::to_purs_constructor()],
         }))
@@ -219,7 +192,6 @@ where T: ToPursType
 {
     fn to_purs_type() -> PursType {
         PursType::Struct(Constructor::Seq(SeqConstructor {
-            import: None,
             name: "Array".to_string(),
             arguments: vec![<T as ToPursConstructor>::to_purs_constructor()]
         }))
@@ -242,9 +214,6 @@ where
 {
     fn to_purs_type() -> PursType {
         PursType::Struct(Constructor::Seq(SeqConstructor {
-            import: Some(Import {
-                type_module: "Data.Maybe",
-            }),
             name: "Maybe".to_string(),
             arguments: vec![<T as ToPursConstructor>::to_purs_constructor()],
         }))
@@ -264,7 +233,7 @@ impl<'a> ToPursConstructor for &'a str {
 impl<'a> ToPursType for &'a str
 {
     fn to_purs_type() -> PursType {
-        PursType::Leaf(Import { type_module: "PRIM" }, "String".to_string())
+        PursType::Leaf("String".to_string())
     }
 }
 
@@ -292,9 +261,6 @@ where
 {
     fn to_purs_type() -> PursType {
         PursType::Struct(Constructor::Seq(SeqConstructor {
-            import: Some(Import {
-                type_module: "Data.Tuple",
-            }),
             name: "Tuple".to_string(),
             arguments: vec![
                 <T as ToPursConstructor>::to_purs_constructor(),
@@ -317,9 +283,6 @@ impl ToPursConstructor for () {
 impl ToPursType for () {
     fn to_purs_type() -> PursType {
         PursType::Struct(Constructor::Seq(SeqConstructor {
-            import: Some(Import {
-                type_module: "Prelude",
-            }),
             name: "Unit".to_string(),
             arguments: vec![],
         }))
@@ -367,7 +330,7 @@ macro_rules! purs_primitive_impl {
 
         impl ToPursType for $rust_type {
             fn to_purs_type() -> PursType {
-                PursType::Leaf(Import { type_module: $import }, $purs_type.to_string())
+                PursType::Leaf($purs_type.to_string())
             }
         }
     }
@@ -439,7 +402,7 @@ impl PursModule {
                         }
                     }
                 },
-                PursType::Leaf(_, _) => ()
+                PursType::Leaf(_) => ()
             }
         }
         PursModule {
@@ -517,7 +480,7 @@ impl Display for PursModule {
 
         for ref type_ in self.types.iter() {
             match *type_ {
-                &PursType::Leaf(_, _) => panic!("Leaf types cannot be at the module top-level"),
+                &PursType::Leaf(_) => panic!("Leaf types cannot be at the module top-level"),
                 &PursType::Struct(ref constructor) => {
                     let name = constructor.get_name();
                     write!(f, "data {} = {}\n\n", name, constructor)?;

@@ -87,7 +87,6 @@ pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, String> {
                     vec![
                         #( ::purescript_waterslide::Constructor::Seq(
                                 ::purescript_waterslide::SeqConstructor {
-                                    import: None,
                                     name: #variant_names,
                                     arguments: #variant_arguments,
                                 })
@@ -102,7 +101,6 @@ pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, String> {
                 ::purescript_waterslide::PursType::Struct(
                     ::purescript_waterslide::Constructor::Record(
                         ::purescript_waterslide::RecordConstructor {
-                            import: None,
                             name: #name.to_string(),
                             arguments: vec![
                                 #( #purs_record_fields ),*
@@ -120,7 +118,6 @@ pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, String> {
                     vec![
                         ::purescript_waterslide::Constructor::Seq(
                             ::purescript_waterslide::SeqConstructor {
-                                import: None,
                                 name: #name.to_string(),
                                 arguments: vec![
                                     #( #purs_tuple_fields ),*

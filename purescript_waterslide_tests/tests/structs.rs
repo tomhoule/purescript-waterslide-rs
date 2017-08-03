@@ -64,7 +64,7 @@ fn struct_with_option() {
 
     assert_eq!(
         &format!("{}", Anonymous::to_purs_type()),
-        "Anonymous { age :: Int, name :: (Maybe String) }"
+        "Anonymous { age :: Int, name :: Maybe String }"
     );
 }
 
@@ -129,5 +129,5 @@ fn struct_with_tuple_fields() {
     #[derive(ToPursType)]
     struct Cow { sides: (u8, u8), milk: bool }
 
-    assert_derives_to!(Cow, "Cow { sides :: (Tuple Int Int), milk :: Boolean }");
+    assert_derives_to!(Cow, "Cow { sides :: Tuple Int Int, milk :: Boolean }");
 }
