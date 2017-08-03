@@ -6,71 +6,6 @@ pub mod purs_constructor;
 pub use purs_constructor::*;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct RecordConstructor {
-    pub name: String,
-    pub arguments: Vec<(String, PursConstructor)>,
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct SeqConstructor {
-    pub name: String,
-    pub arguments: Vec<PursConstructor>,
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub enum Constructor {
-    Seq(SeqConstructor),
-    Record(RecordConstructor),
-}
-
-impl Constructor {
-    fn get_constructor_name(&self) -> String {
-        match *self {
-            Constructor::Seq(ref c) => c.name.clone(),
-            Constructor::Record(ref c) => c.name.clone(),
-        }
-    }
-
-    fn get_name(&self) -> String {
-        match *self {
-            Constructor::Seq(ref c) => {
-                let mut s = String::new();
-
-                if !c.arguments.is_empty() {
-                    s.push_str("(");
-                }
-
-                s.push_str(&c.name);
-
-                for ref arg in c.arguments.iter() {
-
-                    s.push(' ');
-                    s.push_str(&arg.name);
-                }
-
-                if !c.arguments.is_empty() {
-                    s.push_str(")");
-                }
-
-                s
-            }
-            Constructor::Record(ref c) => format!("{}", c.name),
-        }
-    }
-
-    fn get_children(&self) -> Vec<PursConstructor> {
-        match *self {
-            Constructor::Seq(ref c) => c.arguments.clone(),
-            Constructor::Record(ref c) => c.arguments
-                .clone()
-                .into_iter()
-                .map(|(_, arg)| arg)
-                .collect(),
-        }
-    }
-}
-
-#[derive(Clone, Debug, PartialEq)]
 pub enum PursType {
     Struct(PursConstructor, Vec<(String, PursConstructor)>),
     TupleStruct(PursConstructor, Vec<PursConstructor>),
@@ -78,22 +13,9 @@ pub enum PursType {
     Leaf(PursConstructor),
 }
 
-impl PursType {
-    fn get_name(&self) -> String {
-        use PursType::*;
-        match *self {
-            Struct(ref constructor, _) => format!("{}", constructor.name),
-            TupleStruct(ref constructor, _) => format!("{}", constructor.name),
-            Enum(ref constructor, _) => format!("{}", constructor.name),
-            Leaf(ref constructor) => format!("{}", constructor.name),
-        }
-    }
-}
-
 impl Display for PursType {
     fn fmt(&self, f: &mut Formatter) -> ::std::fmt::Result {
         use PursType::*;
-        use Constructor::*;
 
         match *self {
             Struct(ref type_, ref fields) => {
@@ -358,20 +280,16 @@ impl PursModule {
                 PursType::Struct(ref name, ref fields) => {
                     Self::accumulate_imports(&mut imports, name);
 
-                    fields
-                        .iter()
-                        .map(|&(ref _field_name, ref constr)| {
-                            Self::accumulate_imports(&mut imports, &constr)
-                        });
+                    for &(ref _name, ref type_) in fields.iter() {
+                        Self::accumulate_imports(&mut imports, type_)
+                    }
                 },
                 PursType::TupleStruct(ref name, ref fields) => {
                     Self::accumulate_imports(&mut imports, name);
 
-                    fields
-                        .iter()
-                        .map(|constr| {
-                            Self::accumulate_imports(&mut imports, constr)
-                        });
+                    for field in fields.iter() {
+                        Self::accumulate_imports(&mut imports, &field)
+                    }
                 },
                 PursType::Enum(ref name, ref c) => {
                     Self::accumulate_imports(&mut imports, name);
