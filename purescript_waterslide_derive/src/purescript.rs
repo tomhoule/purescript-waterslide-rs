@@ -95,7 +95,12 @@ pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, String> {
                 )
             })
         },
-        Body::Struct(VariantData::Unit) => Err("Unit type".to_string()),
+        Body::Struct(VariantData::Unit) => Ok(quote!(
+                ::purescript_waterslide::PursType::TupleStruct(
+                    <#name as ::purescript_waterslide::ToPursConstructor>::to_purs_constructor(),
+                    vec![]
+                )
+            ))
     }
 }
 
