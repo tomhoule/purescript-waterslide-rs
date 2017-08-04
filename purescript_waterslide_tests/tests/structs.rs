@@ -132,3 +132,14 @@ fn unit_struct() {
 
     assert_derives_to!(AllRight, "AllRight");
 }
+
+#[test]
+fn simple_generic_struct() {
+    #[derive(ToPursType)]
+    struct Paginated<T> {
+        page: u32,
+        data: T,
+    }
+
+    assert_derives_to!(Paginated, "Paginated { page :: Int, data: t }"
+}

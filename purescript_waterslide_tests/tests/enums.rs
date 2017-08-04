@@ -117,3 +117,17 @@ fn mutually_recursive_types() {
         "Branch NumberedNode | Leaf Int"
     );
 }
+
+#[test]
+fn simple_generic_enum() {
+    #[derive(ToPursType)]
+    enum Choice<L, R> {
+        Left(L),
+        Right(R),
+    }
+
+    assert_eq!(
+        &format!("{}", simple_generic_enum::to_purs_type()),
+        "Left l | Right r"
+    );
+}
