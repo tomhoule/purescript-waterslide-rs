@@ -48,7 +48,6 @@ Things I want to add in the coming weeks (in no particular order):
 
 - Generic types (e.g. `Paginated<T>`, or `Paginated a` in Purescript) on top of
   the already working `Paginated<MyStruct>`)
-- Custom auto-importing via container attributes
 - More end to end tests to ensure JSON representation are compatible between
   serde_json and argonaut.
 - Move the default `ToPursType` implementations to an opt-out feature
