@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 #[macro_use]
 extern crate purescript_waterslide_derive;
 extern crate purescript_waterslide;

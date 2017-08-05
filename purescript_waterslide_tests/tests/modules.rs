@@ -1,11 +1,11 @@
+#![allow(dead_code)]
+
 #[macro_use]
 extern crate purescript_waterslide_derive;
 extern crate purescript_waterslide;
 extern crate void;
 
 use void::*;
-
-#[macro_use]
 use purescript_waterslide::*;
 
 #[derive(ToPursType)]

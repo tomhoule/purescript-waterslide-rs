@@ -1,3 +1,5 @@
+#![deny(warnings)]
+
 extern crate syn;
 extern crate proc_macro;
 extern crate proc_macro2;
