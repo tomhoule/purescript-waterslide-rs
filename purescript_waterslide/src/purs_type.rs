@@ -5,8 +5,11 @@ use purs_constructor::*;
 /// enum can be obtained by deriving the `ToPursType` trait.
 #[derive(Clone, Debug, PartialEq)]
 pub enum PursType {
+    /// A purescript record
     Struct(PursConstructor, Vec<(String, PursConstructor)>),
+    /// A purescript type constructor with arguments
     TupleStruct(PursConstructor, Vec<PursConstructor>),
+    /// A purescript data type with multiple constructors
     Enum(PursConstructor, Vec<PursConstructor>),
 }
 
@@ -76,5 +79,6 @@ impl Display for PursType {
 /// required to produce a data type *definition*, whereas `ToPursConstructor` and its corresponding
 /// struct `PursConstructor` are necessary to *use* a type in definitions.
 pub trait ToPursType: ToPursConstructor {
+    /// Statically procudes a PursType instance
     fn to_purs_type() -> PursType;
 }

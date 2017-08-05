@@ -1,5 +1,3 @@
-#[macro_use]
-extern crate purescript_waterslide_derive;
 extern crate purescript_waterslide;
 
 use purescript_waterslide::ToPursConstructor;

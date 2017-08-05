@@ -55,7 +55,7 @@ impl PursModule {
         }
     }
 
-    pub fn accumulate_imports(
+    fn accumulate_imports(
         imports: &mut BTreeMap<String, Vec<String>>,
         type_: &PursConstructor,
     ) {
