@@ -1,5 +1,5 @@
 use syn;
-use syn::{Body, VariantData, Ident};
+use syn::{Body, Ident, VariantData};
 use syn::DeriveInput;
 use quote::{ToTokens, Tokens};
 
@@ -84,7 +84,7 @@ pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, String> {
                     ],
                 )
             })
-        },
+        }
         Body::Struct(VariantData::Tuple(ref fields)) => {
             let purs_tuple_fields = fields.iter().map(TupleField);
             Ok(quote! {
@@ -95,19 +95,23 @@ pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, String> {
                     ],
                 )
             })
-        },
+        }
         Body::Struct(VariantData::Unit) => Ok(quote!(
                 ::purescript_waterslide::PursType::TupleStruct(
                     <#name as ::purescript_waterslide::ToPursConstructor>::to_purs_constructor(),
                     vec![]
                 )
-            ))
+            )),
     }
 }
 
 pub fn make_purs_constructor_impl(ast: &DeriveInput) -> Result<Tokens, String> {
     let name = format!("{}", &ast.ident);
-    let parameters: Vec<Ident> = ast.generics.ty_params.iter().map(|param| param.ident.clone()).collect();
+    let parameters: Vec<Ident> = ast.generics
+        .ty_params
+        .iter()
+        .map(|param| param.ident.clone())
+        .collect();
     Ok(quote! {
         ::purescript_waterslide::PursConstructor {
             name: #name.to_string(),

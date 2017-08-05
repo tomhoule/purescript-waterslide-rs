@@ -32,7 +32,7 @@ impl Display for PursType {
                     write!(f, " ")?;
                 }
                 write!(f, "}}")
-            },
+            }
             TupleStruct(ref type_, ref fields) => {
                 write!(f, "data {} ", type_.name)?;
 
@@ -50,7 +50,7 @@ impl Display for PursType {
                     }
                 }
                 Ok(())
-            },
+            }
             Enum(ref type_, ref constructors) => {
                 write!(f, "data {} ", type_.name)?;
 
@@ -67,7 +67,7 @@ impl Display for PursType {
                     }
                 }
                 Ok(())
-            },
+            }
         }
     }
 }
@@ -75,7 +75,6 @@ impl Display for PursType {
 /// Struct and enums that implement that trait can be part of generated modules.  ToPursType is
 /// required to produce a data type *definition*, whereas ToPursConstructor and its corresponding
 /// struct PursConstructor are necessary to *use* a type in definitions.
-pub trait ToPursType : ToPursConstructor {
+pub trait ToPursType: ToPursConstructor {
     fn to_purs_type() -> PursType;
 }
-

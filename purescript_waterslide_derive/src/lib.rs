@@ -20,12 +20,19 @@ pub fn derive_purstype(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 
     let name = &ast.ident;
     let generics = generics::shift_generics(&ast);
-    let placeholder_generics: Vec<Tokens> = ast.generics.ty_params.iter().map(generics::make_dummy_generic).collect();
+    let placeholder_generics: Vec<Tokens> = ast.generics
+        .ty_params
+        .iter()
+        .map(generics::make_dummy_generic)
+        .collect();
     let placeholder_generics_clone = placeholder_generics.clone();
 
     let to_purs_constructor_impl = match make_purs_constructor_impl(&ast) {
         Ok(generated_impl) => generated_impl,
-        Err(err) => panic!("Could not convert the input to Purescript type constructor: {:?}", err),
+        Err(err) => panic!(
+            "Could not convert the input to Purescript type constructor: {:?}",
+            err
+        ),
     };
 
     let to_purs_impl = match make_purs_type(&ast) {

@@ -10,8 +10,7 @@ impl<T: ToPursConstructor> ToPursConstructor for Vec<T> {
     }
 }
 
-impl<'a, T: ToPursConstructor> ToPursConstructor for &'a [T]
-{
+impl<'a, T: ToPursConstructor> ToPursConstructor for &'a [T] {
     fn to_purs_constructor() -> PursConstructor {
         PursConstructor {
             name: "Array".to_string(),
@@ -42,7 +41,7 @@ impl<'a> ToPursConstructor for &'a str {
 }
 
 impl<T, U> ToPursConstructor for (T, U)
-    where
+where
     T: ToPursConstructor,
     U: ToPursConstructor,
 {
@@ -114,4 +113,3 @@ purs_primitive_impl!(f32, "Number", PRIM);
 purs_primitive_impl!(f64, "Number", PRIM);
 
 purs_primitive_impl!(String, "String", PRIM);
-

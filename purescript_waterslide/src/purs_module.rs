@@ -31,21 +31,21 @@ impl PursModule {
                     for &(ref _name, ref type_) in fields.iter() {
                         Self::accumulate_imports(&mut imports, type_)
                     }
-                },
+                }
                 PursType::TupleStruct(ref name, ref fields) => {
                     Self::accumulate_imports(&mut imports, name);
 
                     for field in fields.iter() {
                         Self::accumulate_imports(&mut imports, &field)
                     }
-                },
+                }
                 PursType::Enum(ref name, ref c) => {
                     Self::accumulate_imports(&mut imports, name);
 
                     for item in c.iter() {
                         Self::accumulate_imports(&mut imports, &item)
                     }
-                },
+                }
             }
         }
         PursModule {
@@ -55,10 +55,12 @@ impl PursModule {
         }
     }
 
-    pub fn accumulate_imports(imports: &mut BTreeMap<String, Vec<String>>, type_: &PursConstructor) {
+    pub fn accumulate_imports(
+        imports: &mut BTreeMap<String, Vec<String>>,
+        type_: &PursConstructor,
+    ) {
         if let Some(ref import) = type_.module {
-            let mut value = imports.entry(import.clone())
-                .or_insert_with(|| Vec::new());
+            let mut value = imports.entry(import.clone()).or_insert_with(|| Vec::new());
             if let None = value.iter().find(|i| **i == type_.name) {
                 value.push(type_.name.clone())
             }
@@ -90,15 +92,30 @@ impl Display for PursModule {
             match *type_ {
                 &PursType::TupleStruct(ref constructor_, ref _fields) => {
                     write!(f, "{}\n\n", type_)?;
-                    write!(f, "derive instance generic{} :: Generic {}\n\n", constructor_.name, constructor_.name)?;
-                },
+                    write!(
+                        f,
+                        "derive instance generic{} :: Generic {}\n\n",
+                        constructor_.name,
+                        constructor_.name
+                    )?;
+                }
                 &PursType::Struct(ref constructor, ref _fields) => {
                     write!(f, "{}\n\n", type_)?;
-                    write!(f, "derive instance generic{} :: Generic {}\n\n", constructor.name, constructor.name)?;
+                    write!(
+                        f,
+                        "derive instance generic{} :: Generic {}\n\n",
+                        constructor.name,
+                        constructor.name
+                    )?;
                 }
                 &PursType::Enum(ref constructor, ref _constructors) => {
                     write!(f, "{}\n\n", type_)?;
-                    write!(f, "derive instance generic{} :: Generic {}\n\n", constructor.name, constructor.name)?;
+                    write!(
+                        f,
+                        "derive instance generic{} :: Generic {}\n\n",
+                        constructor.name,
+                        constructor.name
+                    )?;
                 }
             }
         }
@@ -125,4 +142,3 @@ macro_rules! purs_module {
         }
     }
 }
-

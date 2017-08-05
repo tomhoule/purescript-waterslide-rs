@@ -25,22 +25,31 @@ fn plain_old_struct() {
 
     assert_eq!(
         Plain::to_purs_type(),
-        PursType::Struct(PursConstructor {
-            module: None,
-            name: "Plain".to_string(),
-            parameters: vec![],
-        }, vec![
-            ("age".to_string(), PursConstructor {
-                name: "Int".to_string(),
-                module: Some("PRIM".to_string()),
+        PursType::Struct(
+            PursConstructor {
+                module: None,
+                name: "Plain".to_string(),
                 parameters: vec![],
-            }),
-            ("name".to_string(), PursConstructor {
-                name: "String".to_string(),
-                module: Some("PRIM".to_string()),
-                parameters: vec![],
-            })
-        ])
+            },
+            vec![
+                (
+                    "age".to_string(),
+                    PursConstructor {
+                        name: "Int".to_string(),
+                        module: Some("PRIM".to_string()),
+                        parameters: vec![],
+                    },
+                ),
+                (
+                    "name".to_string(),
+                    PursConstructor {
+                        name: "String".to_string(),
+                        module: Some("PRIM".to_string()),
+                        parameters: vec![],
+                    },
+                ),
+            ]
+        )
     );
 
     assert_eq!(
@@ -108,7 +117,9 @@ fn tuple_struct() {
 #[test]
 fn tuple_struct_with_modifiers() {
     #[derive(ToPursType)]
-    struct Node { no: u8 }
+    struct Node {
+        no: u8,
+    }
 
     #[derive(ToPursType)]
     struct Schema(pub &'static [Node]);
@@ -122,9 +133,15 @@ fn tuple_struct_with_modifiers() {
 #[test]
 fn struct_with_tuple_fields() {
     #[derive(ToPursType)]
-    struct Cow { sides: (u8, u8), milk: bool }
+    struct Cow {
+        sides: (u8, u8),
+        milk: bool,
+    }
 
-    assert_derives_to!(Cow, "data Cow = Cow { sides :: Tuple Int Int, milk :: Boolean }");
+    assert_derives_to!(
+        Cow,
+        "data Cow = Cow { sides :: Tuple Int Int, milk :: Boolean }"
+    );
 }
 
 #[test]

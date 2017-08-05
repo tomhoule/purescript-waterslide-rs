@@ -81,9 +81,15 @@ fn enum_with_struct_and_option() {
 #[test]
 fn enum_with_tuples() {
     #[derive(ToPursType)]
-    enum Dessert { Pie((u8, u8)), Yoghurt((String, u8)) }
+    enum Dessert {
+        Pie((u8, u8)),
+        Yoghurt((String, u8)),
+    }
 
-    assert_derives_to!(Dessert, "data Dessert = Pie (Tuple Int Int) | Yoghurt (Tuple String Int)")
+    assert_derives_to!(
+        Dessert,
+        "data Dessert = Pie (Tuple Int Int) | Yoghurt (Tuple String Int)"
+    )
 }
 
 #[test]
@@ -91,7 +97,7 @@ fn recursive_enum() {
     #[derive(ToPursType)]
     enum Node {
         Branch(Box<Node>),
-        Leaf(i32)
+        Leaf(i32),
     }
 
     assert_eq!(
@@ -111,7 +117,7 @@ fn mutually_recursive_types() {
     #[derive(ToPursType)]
     enum Node {
         Branch(NumberedNode),
-        Leaf(i32)
+        Leaf(i32),
     }
 
     assert_eq!(

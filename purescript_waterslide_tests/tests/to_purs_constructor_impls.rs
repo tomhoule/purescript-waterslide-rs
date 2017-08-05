@@ -18,7 +18,10 @@ fn slices_derive_as_expected() {
 
 #[test]
 fn vecs_derive_as_expected() {
-    assert_eq!(&format!("{}", <Vec<u8>>::to_purs_constructor()), "Array Int");
+    assert_eq!(
+        &format!("{}", <Vec<u8>>::to_purs_constructor()),
+        "Array Int"
+    );
 
 }
 
