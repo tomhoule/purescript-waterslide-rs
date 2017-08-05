@@ -1,3 +1,5 @@
+#![deny(warnings)]
+
 extern crate syn;
 extern crate proc_macro;
 extern crate proc_macro2;
@@ -12,7 +14,7 @@ mod generics;
 use quote::Tokens;
 use purescript::{make_purs_constructor_impl, make_purs_type};
 
-#[proc_macro_derive(ToPursType)]
+#[proc_macro_derive(AsPursType)]
 pub fn derive_purstype(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = input.to_string();
     let ast =
@@ -20,33 +22,40 @@ pub fn derive_purstype(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 
     let name = &ast.ident;
     let generics = generics::shift_generics(&ast);
-    let placeholder_generics: Vec<Tokens> = ast.generics.ty_params.iter().map(generics::make_dummy_generic).collect();
+    let placeholder_generics: Vec<Tokens> = ast.generics
+        .ty_params
+        .iter()
+        .map(generics::make_dummy_generic)
+        .collect();
     let placeholder_generics_clone = placeholder_generics.clone();
 
-    let to_purs_constructor_impl = match make_purs_constructor_impl(&ast) {
+    let as_purs_constructor_impl = match make_purs_constructor_impl(&ast) {
         Ok(generated_impl) => generated_impl,
-        Err(err) => panic!("Could not convert the input to Purescript type constructor: {:?}", err),
+        Err(err) => panic!(
+            "Could not convert the input to Purescript type constructor: {:?}",
+            err
+        ),
     };
 
-    let to_purs_impl = match make_purs_type(&ast) {
+    let as_purs_impl = match make_purs_type(&ast) {
         Ok(generated_impl) => generated_impl,
         Err(err) => panic!("Could not convert the input to Purescript AST: {:?}", err),
     };
 
     let expanded = quote! {
-        impl#generics ::purescript_waterslide::purs_constructor::ToPursConstructor for #name#generics {
-            fn to_purs_constructor() -> ::purescript_waterslide::purs_constructor::PursConstructor {
+        impl#generics ::purescript_waterslide::AsPursConstructor for #name#generics {
+            fn as_purs_constructor() -> ::purescript_waterslide::PursConstructor {
                 #( #placeholder_generics )*
 
-                #to_purs_constructor_impl
+                #as_purs_constructor_impl
             }
         }
 
-        impl#generics ::purescript_waterslide::ToPursType for #name#generics {
-            fn to_purs_type() -> ::purescript_waterslide::PursType {
+        impl#generics ::purescript_waterslide::AsPursType for #name#generics {
+            fn as_purs_type() -> ::purescript_waterslide::PursType {
                 #( #placeholder_generics_clone )*
 
-                #to_purs_impl
+                #as_purs_impl
             }
         }
     };

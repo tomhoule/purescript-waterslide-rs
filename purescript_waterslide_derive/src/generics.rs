@@ -4,7 +4,9 @@ use quote::Tokens;
 // This function is responsible for altering the type parameter names so they are not in scope in
 // the impl block.
 pub fn shift_generics(ast: &DeriveInput) -> Generics {
-    let shifted_type_parameters: Vec<TyParam> = ast.generics.ty_params.iter()
+    let shifted_type_parameters: Vec<TyParam> = ast.generics
+        .ty_params
+        .iter()
         .map(|param| {
             let new_name = format!("{}_", param.ident);
             TyParam {
@@ -13,7 +15,8 @@ pub fn shift_generics(ast: &DeriveInput) -> Generics {
                 bounds: param.bounds.clone(),
                 default: param.default.clone(),
             }
-        }).collect();
+        })
+        .collect();
 
     Generics {
         lifetimes: ast.generics.lifetimes.clone(),
@@ -35,7 +38,7 @@ pub fn shift_generics(ast: &DeriveInput) -> Generics {
 ///
 /// struct T;
 ///
-/// impl ToPursConstructor for T { ...  }
+/// impl AsPursConstructor for T { ...  }
 ///
 pub fn make_dummy_generic(param: &TyParam) -> Tokens {
     let type_ident = &param.ident;
@@ -43,8 +46,8 @@ pub fn make_dummy_generic(param: &TyParam) -> Tokens {
     quote!{
         struct #type_ident;
 
-        impl ToPursConstructor for #type_ident {
-            fn to_purs_constructor() -> PursConstructor {
+        impl AsPursConstructor for #type_ident {
+            fn as_purs_constructor() -> PursConstructor {
                 PursConstructor {
                     module: None,
                     name: #type_name.to_string(),

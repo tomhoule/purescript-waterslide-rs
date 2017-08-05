@@ -7,5 +7,3 @@ homepage = "https://github.com/tomhoule/purescript-waterslide-rs"
 repository = "https://github.com/tomhoule/purescript-waterslide-rs"
 keywords = ["purescript"]
 license = "MIT/Apache-2.0"
-
-[dependencies]

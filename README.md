@@ -17,7 +17,7 @@ release early, release often and gather feedback to get to a 1.0 version soon.
 ## Basic usage
 
 - Derive Purescript representations by annotating your structs and enums with
-  `#[derive(ToPursType)]` or by manually implementing `ToPursType` if you have
+  `#[derive(AsPursType)]` or by manually implementing `AsPursType` if you have
   a custom serialization scheme.
 - Define a module with the `purs_module!` macro (e.g.
   `purs_module!("Data.Dogs".to_string() ; Dachsund, ChowChow, Mutt<Void, Void>)`).
@@ -44,7 +44,7 @@ also provide a lot of usage examples, notably for generic types.
 - Default implementations for primitive types and standard library collections (`Vec`...)
 - Support for generic types (e.g. `Alternative<T, U>`, `Paginated<T>`...)
 - Whole module generation with imports
-- You can define custom representations by manually implementing `ToPursType` (unstable interface)
+- You can define custom representations by manually implementing `AsPursType` (unstable interface)
 
 ### Roadmap
 

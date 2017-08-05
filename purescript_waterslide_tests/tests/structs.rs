@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 #[macro_use]
 extern crate purescript_waterslide_derive;
 extern crate purescript_waterslide;
@@ -9,7 +11,7 @@ use purescript_waterslide::*;
 macro_rules! assert_derives_to {
     ($rust_type:ty, $ps_type:expr) => {
         assert_eq!(
-            &format!("{}", <$rust_type as ToPursType>::to_purs_type()),
+            &format!("{}", <$rust_type as AsPursType>::as_purs_type()),
             $ps_type
         )
     }
@@ -17,119 +19,136 @@ macro_rules! assert_derives_to {
 
 #[test]
 fn plain_old_struct() {
-    #[derive(ToPursType)]
+    #[derive(AsPursType)]
     struct Plain {
         age: i32,
         name: String,
     }
 
     assert_eq!(
-        Plain::to_purs_type(),
-        PursType::Struct(PursConstructor {
-            module: None,
-            name: "Plain".to_string(),
-            parameters: vec![],
-        }, vec![
-            ("age".to_string(), PursConstructor {
-                name: "Int".to_string(),
-                module: Some("PRIM".to_string()),
+        Plain::as_purs_type(),
+        PursType::Struct(
+            PursConstructor {
+                module: None,
+                name: "Plain".to_string(),
                 parameters: vec![],
-            }),
-            ("name".to_string(), PursConstructor {
-                name: "String".to_string(),
-                module: Some("PRIM".to_string()),
-                parameters: vec![],
-            })
-        ])
+            },
+            vec![
+                (
+                    "age".to_string(),
+                    PursConstructor {
+                        name: "Int".to_string(),
+                        module: Some("PRIM".to_string()),
+                        parameters: vec![],
+                    },
+                ),
+                (
+                    "name".to_string(),
+                    PursConstructor {
+                        name: "String".to_string(),
+                        module: Some("PRIM".to_string()),
+                        parameters: vec![],
+                    },
+                ),
+            ]
+        )
     );
 
     assert_eq!(
-        &format!("{}", Plain::to_purs_type()),
+        &format!("{}", Plain::as_purs_type()),
         "data Plain = Plain { age :: Int, name :: String }"
     );
 }
 
 #[test]
 fn struct_with_option() {
-    #[derive(ToPursType)]
+    #[derive(AsPursType)]
     struct Anonymous {
         age: i32,
         name: Option<String>,
     }
 
     assert_eq!(
-        &format!("{}", Anonymous::to_purs_type()),
+        &format!("{}", Anonymous::as_purs_type()),
         "data Anonymous = Anonymous { age :: Int, name :: Maybe String }"
     );
 }
 
 #[test]
 fn struct_with_enum() {
-    #[derive(ToPursType)]
+    #[derive(AsPursType)]
     enum Color {
         Yellow(bool),
         Purple(String),
     }
 
-    #[derive(ToPursType)]
+    #[derive(AsPursType)]
     struct Anonymous {
         age: i32,
         name: Color,
     }
 
     assert_eq!(
-        &format!("{}", Anonymous::to_purs_type()),
+        &format!("{}", Anonymous::as_purs_type()),
         "data Anonymous = Anonymous { age :: Int, name :: Color }"
     );
 }
 
 #[test]
 fn newtype_struct() {
-    #[derive(ToPursType)]
+    #[derive(AsPursType)]
     struct Email(String);
 
     assert_eq!(
-        &format!("{}", Email::to_purs_type()),
+        &format!("{}", Email::as_purs_type()),
         "data Email = Email String"
     );
 }
 
 #[test]
 fn tuple_struct() {
-    #[derive(ToPursType)]
+    #[derive(AsPursType)]
     struct PersonName(String, String);
 
     assert_eq!(
-        &format!("{}", PersonName::to_purs_type()),
+        &format!("{}", PersonName::as_purs_type()),
         "data PersonName = PersonName String String"
     );
 }
 
 #[test]
 fn tuple_struct_with_modifiers() {
-    #[derive(ToPursType)]
-    struct Node { no: u8 }
+    #[derive(AsPursType)]
+    struct Node {
+        no: u8,
+    }
 
-    #[derive(ToPursType)]
+    #[derive(AsPursType)]
     struct Schema(pub &'static [Node]);
 
     assert_eq!(
-        &format!("{}", Schema::to_purs_type()),
+        &format!("{}", Schema::as_purs_type()),
         "data Schema = Schema (Array Node)"
     );
 }
 
 #[test]
 fn struct_with_tuple_fields() {
-    #[derive(ToPursType)]
-    struct Cow { sides: (u8, u8), milk: bool }
+    #[derive(AsPursType)]
+    struct Cow {
+        sides: (u8, u8),
+        milk: bool,
+    }
 
-    assert_derives_to!(Cow, "data Cow = Cow { sides :: Tuple Int Int, milk :: Boolean }");
+    assert_derives_to!(
+        Cow,
+        "data Cow = Cow { sides :: Tuple Int Int, milk :: Boolean }"
+    );
 }
 
 #[test]
 fn unit_struct() {
-    #[derive(ToPursType)]
+    #[derive(AsPursType)]
     struct AllRight;
 
     assert_derives_to!(AllRight, "data AllRight = AllRight");
@@ -137,7 +156,7 @@ fn unit_struct() {
 
 #[test]
 fn simple_generic_struct() {
-    #[derive(ToPursType)]
+    #[derive(AsPursType)]
     struct Paginated<T> {
         page: u32,
         data: T,
@@ -148,7 +167,7 @@ fn simple_generic_struct() {
 
 #[test]
 fn simple_generic_tuple_struct() {
-    #[derive(ToPursType)]
+    #[derive(AsPursType)]
     struct Validated<T>(T);
 
     assert_derives_to!(Validated<Void>, "data Validated t = Validated t")

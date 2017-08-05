@@ -9,14 +9,14 @@ extern crate purescript_waterslide;
 #[macro_use]
 extern crate purescript_waterslide_derive;
 
-use purescript_waterslide::{PursModule, ToPursType};
+use purescript_waterslide::{AsPursType, PursModule};
 use futures::stream::Stream;
 use futures::Future;
 use std::io::prelude::*;
 use std::fs::File;
 use hyper::server::*;
 
-#[derive(Debug, ToPursType, Serialize, Deserialize)]
+#[derive(Debug, AsPursType, Serialize, Deserialize)]
 #[serde(tag = "tag", content = "contents")]
 enum FalafelBasis {
     FavaBean,
@@ -24,13 +24,13 @@ enum FalafelBasis {
     Other(Option<String>),
 }
 
-#[derive(Debug, ToPursType, Serialize, Deserialize)]
+#[derive(Debug, AsPursType, Serialize, Deserialize)]
 struct Falafel {
     basis: FalafelBasis,
     parsley_percentage: u8,
 }
 
-#[derive(Debug, ToPursType, Serialize, Deserialize)]
+#[derive(Debug, AsPursType, Serialize, Deserialize)]
 struct Meal {
     falafels: Vec<Falafel>,
     with_salad: bool,
