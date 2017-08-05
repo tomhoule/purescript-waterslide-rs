@@ -126,8 +126,11 @@ fn simple_generic_enum() {
         Right(R),
     }
 
+    #[derive(ToPursType)]
+    struct Proxy;
+
     assert_eq!(
-        &format!("{}", simple_generic_enum::to_purs_type()),
-        "Left l | Right r"
+        &format!("{}", Choice::<Proxy, Proxy>::to_purs_type()),
+        "Left L | Right R"
     );
 }

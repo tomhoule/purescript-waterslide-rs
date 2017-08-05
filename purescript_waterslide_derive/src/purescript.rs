@@ -56,13 +56,14 @@ impl<'a> ToTokens for RecordField<'a> {
 
 pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, String> {
     let name = &source.ident;
+    let generics = &source.generics;
     match source.body {
         Body::Enum(ref variants) => {
             let variant_names = variants.iter().map(VariantName);
             let variant_arguments = variants.iter().map(VariantArguments);
             Ok(quote! {
                 ::purescript_waterslide::PursType::Enum(
-                    <#name as ::purescript_waterslide::ToPursConstructor>::to_purs_constructor(),
+                    <#name#generics as ::purescript_waterslide::ToPursConstructor>::to_purs_constructor(),
                     vec![
                         #( ::purescript_waterslide::PursConstructor {
                             name: #variant_names,
@@ -77,7 +78,7 @@ pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, String> {
             let purs_record_fields = fields.into_iter().map(RecordField);
             Ok(quote! {
                 ::purescript_waterslide::PursType::Struct(
-                    <#name as ::purescript_waterslide::ToPursConstructor>::to_purs_constructor(),
+                    <#name#generics as ::purescript_waterslide::ToPursConstructor>::to_purs_constructor(),
                     vec![
                         #( #purs_record_fields ),*
                     ],
@@ -88,7 +89,7 @@ pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, String> {
             let purs_tuple_fields = fields.iter().map(TupleField);
             Ok(quote! {
                 ::purescript_waterslide::PursType::TupleStruct(
-                    <#name as ::purescript_waterslide::ToPursConstructor>::to_purs_constructor(),
+                    <#name#generics as ::purescript_waterslide::ToPursConstructor>::to_purs_constructor(),
                     vec![
                         #( #purs_tuple_fields ),*
                     ],

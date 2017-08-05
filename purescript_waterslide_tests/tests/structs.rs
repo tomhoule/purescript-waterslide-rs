@@ -141,5 +141,19 @@ fn simple_generic_struct() {
         data: T,
     }
 
-    assert_derives_to!(Paginated, "Paginated { page :: Int, data: t }"
+    #[derive(ToPursType)]
+    struct Proxy;
+
+    assert_derives_to!(Paginated<Proxy>, "Paginated { page :: Int, data :: T }")
+}
+
+#[test]
+fn simple_generic_tuple_struct() {
+    #[derive(ToPursType)]
+    struct Validated<T>(T);
+
+    #[derive(ToPursType)]
+    struct Proxy;
+
+    assert_derives_to!(Validated<Proxy>, "Validated T")
 }
