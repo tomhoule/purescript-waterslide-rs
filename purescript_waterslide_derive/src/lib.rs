@@ -34,8 +34,8 @@ pub fn derive_purstype(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
     };
 
     let expanded = quote! {
-        impl#generics ::purescript_waterslide::purs_constructor::ToPursConstructor for #name#generics {
-            fn to_purs_constructor() -> ::purescript_waterslide::purs_constructor::PursConstructor {
+        impl#generics ::purescript_waterslide::ToPursConstructor for #name#generics {
+            fn to_purs_constructor() -> ::purescript_waterslide::PursConstructor {
                 #( #placeholder_generics )*
 
                 #to_purs_constructor_impl

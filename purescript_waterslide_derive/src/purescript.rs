@@ -109,11 +109,11 @@ pub fn make_purs_constructor_impl(ast: &DeriveInput) -> Result<Tokens, String> {
     let name = format!("{}", &ast.ident);
     let parameters: Vec<Ident> = ast.generics.ty_params.iter().map(|param| param.ident.clone()).collect();
     Ok(quote! {
-        ::purescript_waterslide::purs_constructor::PursConstructor {
+        ::purescript_waterslide::PursConstructor {
             name: #name.to_string(),
             module: None,
             parameters: vec![
-                #( <#parameters as ::purescript_waterslide::purs_constructor::ToPursConstructor>::to_purs_constructor() ),*
+                #( <#parameters as ::purescript_waterslide::ToPursConstructor>::to_purs_constructor() ),*
             ],
         }
     })
