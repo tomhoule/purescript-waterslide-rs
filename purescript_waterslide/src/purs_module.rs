@@ -14,7 +14,7 @@ pub struct PursModule {
 }
 
 impl PursModule {
-    /// The `purs_module!` macro is slightly more convenient because it calls `to_purs_type` for
+    /// The `purs_module!` macro is slightly more convenient because it calls `as_purs_type` for
     /// you.
     pub fn new(name: String, types: Vec<PursType>) -> Self {
         let mut imports = BTreeMap::new();
@@ -55,10 +55,7 @@ impl PursModule {
         }
     }
 
-    fn accumulate_imports(
-        imports: &mut BTreeMap<String, Vec<String>>,
-        type_: &PursConstructor,
-    ) {
+    fn accumulate_imports(imports: &mut BTreeMap<String, Vec<String>>, type_: &PursConstructor) {
         if let Some(ref import) = type_.module {
             let mut value = imports.entry(import.clone()).or_insert_with(Vec::new);
             if value.iter().find(|i| **i == type_.name).is_none() {
@@ -130,13 +127,13 @@ impl Display for PursModule {
 /// Sauce<void::Void>, Butter);`
 ///
 /// Note the usage of the `Void` type from the `void` crate as a type argument. Since the type
-/// arguments are not used when deriving `ToPursType`, any other type should work here.
+/// arguments are not used when deriving `AsPursType`, any other type should work here.
 #[macro_export]
 macro_rules! purs_module {
     ( $name:expr ; $( $p:path ),* ) => {
         {
             let purs_types = vec![
-                $( <$p>::to_purs_type() ),*
+                $( <$p>::as_purs_type() ),*
             ];
             PursModule::new($name, purs_types)
         }

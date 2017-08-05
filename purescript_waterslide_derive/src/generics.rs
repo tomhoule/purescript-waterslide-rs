@@ -38,7 +38,7 @@ pub fn shift_generics(ast: &DeriveInput) -> Generics {
 ///
 /// struct T;
 ///
-/// impl ToPursConstructor for T { ...  }
+/// impl AsPursConstructor for T { ...  }
 ///
 pub fn make_dummy_generic(param: &TyParam) -> Tokens {
     let type_ident = &param.ident;
@@ -46,8 +46,8 @@ pub fn make_dummy_generic(param: &TyParam) -> Tokens {
     quote!{
         struct #type_ident;
 
-        impl ToPursConstructor for #type_ident {
-            fn to_purs_constructor() -> PursConstructor {
+        impl AsPursConstructor for #type_ident {
+            fn as_purs_constructor() -> PursConstructor {
                 PursConstructor {
                     module: None,
                     name: #type_name.to_string(),

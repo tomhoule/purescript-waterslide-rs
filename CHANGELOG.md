@@ -9,6 +9,11 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 ### Added
 
 * Generic data types support
+* Considerably improved documentation
+
+### Changed
+
+* Renamed `ToPursType` and `ToPursConstructor` to `AsPursType` and `AsPursConstructor`
 
 ## [0.2.1] - 2017-08-03
 

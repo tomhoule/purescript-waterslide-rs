@@ -21,8 +21,8 @@ impl<'a> ToTokens for VariantArguments<'a> {
             tokens.append(quote!{
                 vec![
                     #( <
-                       #tys as ::purescript_waterslide::ToPursConstructor
-                       >::to_purs_constructor()  ),*
+                       #tys as ::purescript_waterslide::AsPursConstructor
+                       >::as_purs_constructor()  ),*
                 ]
             })
         } else {
@@ -37,7 +37,7 @@ impl<'a> ToTokens for TupleField<'a> {
     fn to_tokens(&self, tokens: &mut Tokens) {
         let ty = &self.0.ty;
         tokens.append(quote!{
-            <#ty as ::purescript_waterslide::ToPursConstructor>::to_purs_constructor()
+            <#ty as ::purescript_waterslide::AsPursConstructor>::as_purs_constructor()
         })
     }
 }
@@ -55,7 +55,7 @@ impl<'a> ToTokens for RecordField<'a> {
         tokens.append(quote!{
             (
                 #name.to_string(),
-                <#ty as ::purescript_waterslide::ToPursConstructor>::to_purs_constructor()
+                <#ty as ::purescript_waterslide::AsPursConstructor>::as_purs_constructor()
             )
         })
     }
@@ -71,8 +71,8 @@ pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, String> {
             Ok(quote! {
                 ::purescript_waterslide::PursType::Enum(
                     <
-                    #name#generics as ::purescript_waterslide::ToPursConstructor
-                    >::to_purs_constructor(),
+                    #name#generics as ::purescript_waterslide::AsPursConstructor
+                    >::as_purs_constructor(),
                     vec![
                         #( ::purescript_waterslide::PursConstructor {
                             name: #variant_names,
@@ -88,8 +88,8 @@ pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, String> {
             Ok(quote! {
                 ::purescript_waterslide::PursType::Struct(
                     <
-                    #name#generics as ::purescript_waterslide::ToPursConstructor
-                    >::to_purs_constructor(),
+                    #name#generics as ::purescript_waterslide::AsPursConstructor
+                    >::as_purs_constructor(),
                     vec![
                         #( #purs_record_fields ),*
                     ],
@@ -101,8 +101,8 @@ pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, String> {
             Ok(quote! {
                 ::purescript_waterslide::PursType::TupleStruct(
                     <
-                    #name#generics as ::purescript_waterslide::ToPursConstructor
-                    >::to_purs_constructor(),
+                    #name#generics as ::purescript_waterslide::AsPursConstructor
+                    >::as_purs_constructor(),
                     vec![
                         #( #purs_tuple_fields ),*
                     ],
@@ -111,7 +111,7 @@ pub fn make_purs_type(source: &DeriveInput) -> Result<Tokens, String> {
         }
         Body::Struct(VariantData::Unit) => Ok(quote!(
                 ::purescript_waterslide::PursType::TupleStruct(
-                    <#name as ::purescript_waterslide::ToPursConstructor>::to_purs_constructor(),
+                    <#name as ::purescript_waterslide::AsPursConstructor>::as_purs_constructor(),
                     vec![]
                 )
             )),
@@ -132,8 +132,8 @@ pub fn make_purs_constructor_impl(ast: &DeriveInput) -> Result<Tokens, String> {
             parameters: vec![
                 #(
                     <
-                    #parameters as ::purescript_waterslide::ToPursConstructor
-                    >::to_purs_constructor()
+                    #parameters as ::purescript_waterslide::AsPursConstructor
+                    >::as_purs_constructor()
                 ),*
             ],
         }

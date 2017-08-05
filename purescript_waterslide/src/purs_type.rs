@@ -2,7 +2,7 @@ use std::fmt::{Display, Formatter};
 use purs_constructor::*;
 
 /// The representation for a Purescript data type declaration. The `PursType` for a Rust struct and
-/// enum can be obtained by deriving the `ToPursType` trait.
+/// enum can be obtained by deriving the `AsPursType` trait.
 #[derive(Clone, Debug, PartialEq)]
 pub enum PursType {
     /// A purescript record
@@ -75,10 +75,10 @@ impl Display for PursType {
     }
 }
 
-/// Struct and enums that implement that trait can be part of generated modules. `ToPursType` is
-/// required to produce a data type *definition*, whereas `ToPursConstructor` and its corresponding
+/// Struct and enums that implement that trait can be part of generated modules. `AsPursType` is
+/// required to produce a data type *definition*, whereas `AsPursConstructor` and its corresponding
 /// struct `PursConstructor` are necessary to *use* a type in definitions.
-pub trait ToPursType: ToPursConstructor {
+pub trait AsPursType: AsPursConstructor {
     /// Statically procudes a PursType instance
-    fn to_purs_type() -> PursType;
+    fn as_purs_type() -> PursType;
 }

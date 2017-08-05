@@ -8,21 +8,21 @@ extern crate void;
 use void::*;
 use purescript_waterslide::*;
 
-#[derive(ToPursType)]
+#[derive(AsPursType)]
 enum Color {
     Red(u8),
     Green(u8),
     Blue(Vec<u8>),
 }
 
-#[derive(ToPursType)]
+#[derive(AsPursType)]
 enum Currency {
     Coins,
     Credits,
     Abolished,
 }
 
-#[derive(ToPursType)]
+#[derive(AsPursType)]
 struct Fruit {
     color: Color,
     price: u64,
@@ -58,23 +58,23 @@ derive instance genericFruit :: Generic Fruit
 
 #[test]
 fn module_with_generics() {
-    #[derive(ToPursType)]
+    #[derive(AsPursType)]
     enum Page<T> {
         NonEmpty(Vec<T>),
         OOB,
     }
 
-    #[derive(ToPursType)]
+    #[derive(AsPursType)]
     struct Paginated<T, META> {
         page_num: u32,
         contents: Page<T>,
         metadata: META,
     }
 
-    #[derive(ToPursType)]
+    #[derive(AsPursType)]
     struct SomethingElse<T>(T);
 
-    #[derive(ToPursType)]
+    #[derive(AsPursType)]
     struct Proxy;
 
     let module = purs_module!("Pagination".to_string() ;

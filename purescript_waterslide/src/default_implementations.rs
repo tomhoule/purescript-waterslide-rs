@@ -1,37 +1,37 @@
 use purs_constructor::*;
 
-impl<T: ToPursConstructor> ToPursConstructor for Vec<T> {
-    fn to_purs_constructor() -> PursConstructor {
+impl<T: AsPursConstructor> AsPursConstructor for Vec<T> {
+    fn as_purs_constructor() -> PursConstructor {
         PursConstructor {
             name: "Array".to_string(),
             module: None,
-            parameters: vec![<T as ToPursConstructor>::to_purs_constructor()],
+            parameters: vec![<T as AsPursConstructor>::as_purs_constructor()],
         }
     }
 }
 
-impl<'a, T: ToPursConstructor> ToPursConstructor for &'a [T] {
-    fn to_purs_constructor() -> PursConstructor {
+impl<'a, T: AsPursConstructor> AsPursConstructor for &'a [T] {
+    fn as_purs_constructor() -> PursConstructor {
         PursConstructor {
             name: "Array".to_string(),
             module: None,
-            parameters: vec![<T as ToPursConstructor>::to_purs_constructor()],
+            parameters: vec![<T as AsPursConstructor>::as_purs_constructor()],
         }
     }
 }
 
-impl<T: ToPursConstructor> ToPursConstructor for Option<T> {
-    fn to_purs_constructor() -> PursConstructor {
+impl<T: AsPursConstructor> AsPursConstructor for Option<T> {
+    fn as_purs_constructor() -> PursConstructor {
         PursConstructor {
             name: "Maybe".to_string(),
             module: Some("Data.Maybe".to_string()),
-            parameters: vec![<T as ToPursConstructor>::to_purs_constructor()],
+            parameters: vec![<T as AsPursConstructor>::as_purs_constructor()],
         }
     }
 }
 
-impl<'a> ToPursConstructor for &'a str {
-    fn to_purs_constructor() -> PursConstructor {
+impl<'a> AsPursConstructor for &'a str {
+    fn as_purs_constructor() -> PursConstructor {
         PursConstructor {
             name: "String".to_string(),
             module: None,
@@ -40,25 +40,25 @@ impl<'a> ToPursConstructor for &'a str {
     }
 }
 
-impl<T, U> ToPursConstructor for (T, U)
+impl<T, U> AsPursConstructor for (T, U)
 where
-    T: ToPursConstructor,
-    U: ToPursConstructor,
+    T: AsPursConstructor,
+    U: AsPursConstructor,
 {
-    fn to_purs_constructor() -> PursConstructor {
+    fn as_purs_constructor() -> PursConstructor {
         PursConstructor {
             name: "Tuple".to_string(),
             module: Some("Data.Tuple".to_string()),
             parameters: vec![
-                <T as ToPursConstructor>::to_purs_constructor(),
-                <U as ToPursConstructor>::to_purs_constructor(),
+                <T as AsPursConstructor>::as_purs_constructor(),
+                <U as AsPursConstructor>::as_purs_constructor(),
             ],
         }
     }
 }
 
-impl ToPursConstructor for () {
-    fn to_purs_constructor() -> PursConstructor {
+impl AsPursConstructor for () {
+    fn as_purs_constructor() -> PursConstructor {
         PursConstructor {
             module: Some("Prelude".to_string()),
             name: "Tuple".to_string(),
@@ -67,22 +67,22 @@ impl ToPursConstructor for () {
     }
 }
 
-impl<T: ToPursConstructor> ToPursConstructor for Box<T> {
-    fn to_purs_constructor() -> PursConstructor {
-        T::to_purs_constructor()
+impl<T: AsPursConstructor> AsPursConstructor for Box<T> {
+    fn as_purs_constructor() -> PursConstructor {
+        T::as_purs_constructor()
     }
 }
 
-impl<'a, T: ToPursConstructor> ToPursConstructor for &'a T {
-    fn to_purs_constructor() -> PursConstructor {
-        T::to_purs_constructor()
+impl<'a, T: AsPursConstructor> AsPursConstructor for &'a T {
+    fn as_purs_constructor() -> PursConstructor {
+        T::as_purs_constructor()
     }
 }
 
 macro_rules! purs_primitive_impl {
     ($rust_type:ty, $purs_type:expr, $import:expr) => {
-        impl ToPursConstructor for $rust_type {
-            fn to_purs_constructor() -> PursConstructor {
+        impl AsPursConstructor for $rust_type {
+            fn as_purs_constructor() -> PursConstructor {
                 PursConstructor {
                     module: Some($import.to_string()),
                     name: $purs_type.to_string(),

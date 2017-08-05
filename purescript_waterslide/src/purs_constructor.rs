@@ -1,9 +1,9 @@
 use std::fmt::{Display, Formatter};
 
 /// Produce a `PursConstructor` from a Rust type.
-pub trait ToPursConstructor {
+pub trait AsPursConstructor {
     /// Statically produces a `PursConstructor`.
-    fn to_purs_constructor() -> PursConstructor;
+    fn as_purs_constructor() -> PursConstructor;
 }
 
 /// Represents a Purescript type name with its parameters and which module it comes from.

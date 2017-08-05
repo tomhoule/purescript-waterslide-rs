@@ -11,7 +11,7 @@ use void::Void;
 macro_rules! assert_derives_to {
     ($rust_type:ty, $ps_type:expr) => {
         assert_eq!(
-            &format!("{}", <$rust_type as ToPursType>::to_purs_type()),
+            &format!("{}", <$rust_type as AsPursType>::as_purs_type()),
             $ps_type
         )
     }
@@ -19,7 +19,7 @@ macro_rules! assert_derives_to {
 
 #[test]
 fn plain_old_enum() {
-    #[derive(ToPursType)]
+    #[derive(AsPursType)]
     enum GoodBoy {
         Doggo,
         Pupper,
@@ -27,7 +27,7 @@ fn plain_old_enum() {
     }
 
     assert_eq!(
-        GoodBoy::to_purs_type(),
+        GoodBoy::as_purs_type(),
         // data GoodBoy = Doggo | Pupper | Shibe
         PursType::Enum(
             PursConstructor {
@@ -56,33 +56,33 @@ fn plain_old_enum() {
     );
 
     assert_eq!(
-        &format!("{}", GoodBoy::to_purs_type()),
+        &format!("{}", GoodBoy::as_purs_type()),
         "data GoodBoy = Doggo | Pupper | Shibe"
     )
 }
 
 #[test]
 fn enum_with_struct_and_option() {
-    #[derive(ToPursType)]
+    #[derive(AsPursType)]
     struct Topping {
         ingredient: String,
     };
 
-    #[derive(ToPursType)]
+    #[derive(AsPursType)]
     enum Dessert {
         Pie(Topping),
         IceCream(Option<Topping>),
     }
 
     assert_eq!(
-        &format!("{}", Dessert::to_purs_type()),
+        &format!("{}", Dessert::as_purs_type()),
         "data Dessert = Pie Topping | IceCream (Maybe Topping)"
     )
 }
 
 #[test]
 fn enum_with_tuples() {
-    #[derive(ToPursType)]
+    #[derive(AsPursType)]
     enum Dessert {
         Pie((u8, u8)),
         Yoghurt((String, u8)),
@@ -96,48 +96,48 @@ fn enum_with_tuples() {
 
 #[test]
 fn recursive_enum() {
-    #[derive(ToPursType)]
+    #[derive(AsPursType)]
     enum Node {
         Branch(Box<Node>),
         Leaf(i32),
     }
 
     assert_eq!(
-        &format!("{}", Node::to_purs_type()),
+        &format!("{}", Node::as_purs_type()),
         "data Node = Branch Node | Leaf Int"
     );
 }
 
 #[test]
 fn mutually_recursive_types() {
-    #[derive(ToPursType)]
+    #[derive(AsPursType)]
     struct NumberedNode {
         number: f32,
         node: &'static Node,
     }
 
-    #[derive(ToPursType)]
+    #[derive(AsPursType)]
     enum Node {
         Branch(NumberedNode),
         Leaf(i32),
     }
 
     assert_eq!(
-        &format!("{}", Node::to_purs_type()),
+        &format!("{}", Node::as_purs_type()),
         "data Node = Branch NumberedNode | Leaf Int"
     );
 }
 
 #[test]
 fn simple_generic_enum() {
-    #[derive(ToPursType)]
+    #[derive(AsPursType)]
     enum Choice<L, R> {
         Left(L),
         Right(R),
     }
 
     assert_eq!(
-        &format!("{}", Choice::<Void, Void>::to_purs_type()),
+        &format!("{}", Choice::<Void, Void>::as_purs_type()),
         "data Choice l r = Left l | Right r"
     );
 }
