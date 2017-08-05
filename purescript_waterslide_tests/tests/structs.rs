@@ -1,7 +1,9 @@
 #[macro_use]
 extern crate purescript_waterslide_derive;
 extern crate purescript_waterslide;
+extern crate void;
 
+use void::Void;
 use purescript_waterslide::*;
 
 macro_rules! assert_derives_to {
@@ -141,10 +143,7 @@ fn simple_generic_struct() {
         data: T,
     }
 
-    #[derive(ToPursType)]
-    struct Proxy;
-
-    assert_derives_to!(Paginated<Proxy>, "data Paginated t = Paginated { page :: Int, data :: t }")
+    assert_derives_to!(Paginated<Void>, "data Paginated t = Paginated { page :: Int, data :: t }")
 }
 
 #[test]
@@ -152,8 +151,5 @@ fn simple_generic_tuple_struct() {
     #[derive(ToPursType)]
     struct Validated<T>(T);
 
-    #[derive(ToPursType)]
-    struct Proxy;
-
-    assert_derives_to!(Validated<Proxy>, "data Validated t = Validated t")
+    assert_derives_to!(Validated<Void>, "data Validated t = Validated t")
 }

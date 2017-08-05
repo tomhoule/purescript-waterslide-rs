@@ -1,6 +1,9 @@
 #[macro_use]
 extern crate purescript_waterslide_derive;
 extern crate purescript_waterslide;
+extern crate void;
+
+use void::*;
 
 #[macro_use]
 use purescript_waterslide::*;
@@ -75,9 +78,9 @@ fn module_with_generics() {
     struct Proxy;
 
     let module = purs_module!("Pagination".to_string() ;
-                              Paginated<Proxy, Proxy>,
-                              Page<Proxy>,
-                              SomethingElse<Proxy>);
+                              Paginated<Void, Void>,
+                              Page<Void>,
+                              SomethingElse<Void>);
 
     assert_eq!(
         &format!("{}", &module),

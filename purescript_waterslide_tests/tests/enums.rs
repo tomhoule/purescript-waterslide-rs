@@ -1,8 +1,10 @@
 #[macro_use]
 extern crate purescript_waterslide_derive;
 extern crate purescript_waterslide;
+extern crate void;
 
 use purescript_waterslide::*;
+use void::Void;
 
 macro_rules! assert_derives_to {
     ($rust_type:ty, $ps_type:expr) => {
@@ -126,11 +128,8 @@ fn simple_generic_enum() {
         Right(R),
     }
 
-    #[derive(ToPursType)]
-    struct Proxy;
-
     assert_eq!(
-        &format!("{}", Choice::<Proxy, Proxy>::to_purs_type()),
+        &format!("{}", Choice::<Void, Void>::to_purs_type()),
         "data Choice l r = Left l | Right r"
     );
 }
