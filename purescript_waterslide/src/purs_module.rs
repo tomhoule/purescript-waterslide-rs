@@ -23,7 +23,7 @@ impl PursModule {
             vec!["class Generic".to_string()],
         );
 
-        for type_ in types.iter() {
+        for type_ in &types {
             match *type_ {
                 PursType::Struct(ref name, ref fields) => {
                     Self::accumulate_imports(&mut imports, name);
@@ -36,14 +36,14 @@ impl PursModule {
                     Self::accumulate_imports(&mut imports, name);
 
                     for field in fields.iter() {
-                        Self::accumulate_imports(&mut imports, &field)
+                        Self::accumulate_imports(&mut imports, field)
                     }
                 }
                 PursType::Enum(ref name, ref c) => {
                     Self::accumulate_imports(&mut imports, name);
 
                     for item in c.iter() {
-                        Self::accumulate_imports(&mut imports, &item)
+                        Self::accumulate_imports(&mut imports, item)
                     }
                 }
             }
@@ -60,14 +60,14 @@ impl PursModule {
         type_: &PursConstructor,
     ) {
         if let Some(ref import) = type_.module {
-            let mut value = imports.entry(import.clone()).or_insert_with(|| Vec::new());
-            if let None = value.iter().find(|i| **i == type_.name) {
+            let mut value = imports.entry(import.clone()).or_insert_with(Vec::new);
+            if value.iter().find(|i| **i == type_.name).is_none() {
                 value.push(type_.name.clone())
             }
         }
 
-        for ref param in type_.parameters.iter() {
-            Self::accumulate_imports(imports, &param)
+        for param in &type_.parameters {
+            Self::accumulate_imports(imports, param)
         }
     }
 }
@@ -76,7 +76,7 @@ impl Display for PursModule {
     fn fmt(&self, f: &mut Formatter) -> ::std::fmt::Result {
         write!(f, "module {} where\n\n", self.name)?;
 
-        for (key, value) in self.imports.iter() {
+        for (key, value) in &self.imports {
             if key == "PRIM" {
                 continue;
             }
@@ -88,9 +88,9 @@ impl Display for PursModule {
         }
         write!(f, "\n")?;
 
-        for ref type_ in self.types.iter() {
+        for type_ in &self.types {
             match *type_ {
-                &PursType::TupleStruct(ref constructor_, ref _fields) => {
+                PursType::TupleStruct(ref constructor_, ref _fields) => {
                     write!(f, "{}\n\n", type_)?;
                     write!(
                         f,
@@ -99,7 +99,7 @@ impl Display for PursModule {
                         constructor_.name
                     )?;
                 }
-                &PursType::Struct(ref constructor, ref _fields) => {
+                PursType::Struct(ref constructor, ref _fields) => {
                     write!(f, "{}\n\n", type_)?;
                     write!(
                         f,
@@ -108,7 +108,7 @@ impl Display for PursModule {
                         constructor.name
                     )?;
                 }
-                &PursType::Enum(ref constructor, ref _constructors) => {
+                PursType::Enum(ref constructor, ref _constructors) => {
                     write!(f, "{}\n\n", type_)?;
                     write!(
                         f,
@@ -130,7 +130,7 @@ impl Display for PursModule {
 /// Sauce<void::Void>, Butter);`
 ///
 /// Note the usage of the `Void` type from the `void` crate as a type argument. Since the type
-/// arguments are not used when deriving ToPursType, any other type should work here.
+/// arguments are not used when deriving `ToPursType`, any other type should work here.
 #[macro_export]
 macro_rules! purs_module {
     ( $name:expr ; $( $p:path ),* ) => {

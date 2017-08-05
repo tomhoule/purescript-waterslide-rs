@@ -1,8 +1,8 @@
 use std::fmt::{Display, Formatter};
 use purs_constructor::*;
 
-/// The representation for a Purescript data type declaration. The PursType for a Rust struct and
-/// enum can be obtained by deriving the ToPursType trait.
+/// The representation for a Purescript data type declaration. The `PursType` for a Rust struct and
+/// enum can be obtained by deriving the `ToPursType` trait.
 #[derive(Clone, Debug, PartialEq)]
 pub enum PursType {
     Struct(PursConstructor, Vec<(String, PursConstructor)>),
@@ -18,8 +18,8 @@ impl Display for PursType {
             Struct(ref type_, ref fields) => {
                 write!(f, "data {} ", type_.name)?;
 
-                for ref param in type_.parameters.iter() {
-                    write!(f, "{} ", param.name)?;
+                for param in &type_.parameters {
+                    write!(f, "{} ", &param.name)?;
                 }
 
                 write!(f, "= {} {{ ", type_.name)?;
@@ -36,13 +36,13 @@ impl Display for PursType {
             TupleStruct(ref type_, ref fields) => {
                 write!(f, "data {} ", type_.name)?;
 
-                for ref param in type_.parameters.iter() {
-                    write!(f, "{} ", param.name)?;
+                for param in &type_.parameters {
+                    write!(f, "{} ", &param.name)?;
                 }
 
                 write!(f, "= {}", type_.name)?;
 
-                for ref field in fields.iter() {
+                for field in fields.iter() {
                     if field.parameters.is_empty() {
                         write!(f, " {}", field)?;
                     } else {
@@ -54,13 +54,13 @@ impl Display for PursType {
             Enum(ref type_, ref constructors) => {
                 write!(f, "data {} ", type_.name)?;
 
-                for ref param in type_.parameters.iter() {
-                    write!(f, "{} ", param.name)?;
+                for param in &type_.parameters {
+                    write!(f, "{} ", &param.name)?;
                 }
 
                 write!(f, "= ")?;
 
-                for (idx, ref constructor) in constructors.iter().enumerate() {
+                for (idx, constructor) in constructors.iter().enumerate() {
                     write!(f, "{}", constructor)?;
                     if idx < constructors.len() - 1 {
                         write!(f, " | ")?;
@@ -72,9 +72,9 @@ impl Display for PursType {
     }
 }
 
-/// Struct and enums that implement that trait can be part of generated modules.  ToPursType is
-/// required to produce a data type *definition*, whereas ToPursConstructor and its corresponding
-/// struct PursConstructor are necessary to *use* a type in definitions.
+/// Struct and enums that implement that trait can be part of generated modules. `ToPursType` is
+/// required to produce a data type *definition*, whereas `ToPursConstructor` and its corresponding
+/// struct `PursConstructor` are necessary to *use* a type in definitions.
 pub trait ToPursType: ToPursConstructor {
     fn to_purs_type() -> PursType;
 }
