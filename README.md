@@ -4,21 +4,22 @@
 
 ![logo](purescript_waterslide.jpg)
 
-Wouldn't it be nice if you could share your type definitions between your Rust
-backend and your Purescript app? Now you can!
+Wouldn't it be nice if you could share your data type definitions between your
+Rust backend and your Purescript app? Now you can!
 
-Waterslide generates Purescript type definitions from Rust structs and enums. It
-works on stable Rust.
+Waterslide generates Purescript type definitions from Rust structs and enums.
+It works on stable Rust.
 
-This is a very young project and the code is very much cobbled together at the
-moment, but the basic features are working and the idea is to release early,
-release often.
+The library is still young but the core features are working. The idea is to
+release early, release often and gather feedback to get to a 1.0 version soon.
 
 ## Basic usage
 
 - Derive Purescript representations by annotating your structs and enums with
-  `#[derive(ToPursType)]` or by manually implementing `ToPursType`.
-- Define a module with the `purs_module!` macro.
+  `#[derive(ToPursType)]` or by manually implementing `ToPursType` if you have
+  a custom serialization scheme.
+- Define a module with the `purs_module!` macro (e.g.
+  `purs_module!("Data.Dogs".to_string() ; Dachsund, ChowChow, Mutt<Void, Void>)`).
 - Print the module to stdout or directly to a file using `PursModule`'s
   `Display` impl.
 
@@ -33,12 +34,14 @@ You might want to put the module generation code in a separate binary, which is 
 These restrictions will be lifted in the future by the development of an
 Argonaut codec that mirrors `serde_json`'s defaults.
 
-For running code, take a look at the [basic example](examples/basic).
+For running code, take a look at the [basic example](examples/basic). The tests
+also provide a lot of usage examples, notably for generic types.
 
 ## Features
 
 - Struct and enum definitions, including tuple structs.
-- Support for optional values and collections (`Vec`...)
+- Default implementations for primitive types and standard library collections (`Vec`...)
+- Support for generic types (e.g. `Alternative<T, U>`, `Paginated<T>`...)
 - Whole module generation with imports
 - You can define custom representations by manually implementing `ToPursType` (unstable interface)
 
@@ -46,12 +49,8 @@ For running code, take a look at the [basic example](examples/basic).
 
 Things I want to add in the coming weeks (in no particular order):
 
-- Generic types (e.g. `Paginated<T>`, or `Paginated a` in Purescript) on top of
-  the already working `Paginated<MyStruct>`)
-- Custom auto-importing via container attributes
 - More end to end tests to ensure JSON representation are compatible between
   serde_json and argonaut.
-- Move the default `ToPursType` implementations to an opt-out feature
 - Better documentation and examples
 
 ## Acknowledgments

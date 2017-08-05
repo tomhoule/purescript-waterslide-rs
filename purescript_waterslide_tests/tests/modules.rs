@@ -1,6 +1,9 @@
 #[macro_use]
 extern crate purescript_waterslide_derive;
 extern crate purescript_waterslide;
+extern crate void;
+
+use void::*;
 
 #[macro_use]
 use purescript_waterslide::*;
@@ -48,6 +51,56 @@ derive instance genericColor :: Generic Color
 data Fruit = Fruit { color :: Color, price :: Int, currency :: Currency }
 
 derive instance genericFruit :: Generic Fruit
+
+"
+    );
+}
+
+#[test]
+fn module_with_generics() {
+    #[derive(ToPursType)]
+    enum Page<T> {
+        NonEmpty(Vec<T>),
+        OOB,
+    }
+
+    #[derive(ToPursType)]
+    struct Paginated<T, META> {
+        page_num: u32,
+        contents: Page<T>,
+        metadata: META,
+    }
+
+    #[derive(ToPursType)]
+    struct SomethingElse<T>(T);
+
+    #[derive(ToPursType)]
+    struct Proxy;
+
+    let module = purs_module!("Pagination".to_string() ;
+                              Paginated<Void, Void>,
+                              Page<Void>,
+                              SomethingElse<Void>);
+
+    assert_eq!(
+        &format!("{}", &module),
+        "module Pagination where
+
+import Data.Generic (
+class Generic
+)
+
+data Paginated t meta = Paginated { page_num :: Int, contents :: Page t, metadata :: meta }
+
+derive instance genericPaginated :: Generic Paginated
+
+data Page t = NonEmpty (Array t) | OOB
+
+derive instance genericPage :: Generic Page
+
+data SomethingElse t = SomethingElse t
+
+derive instance genericSomethingElse :: Generic SomethingElse
 
 "
     );
