@@ -1,6 +1,7 @@
 # purescript-waterslide-rs
 ![travis badge](https://travis-ci.org/tomhoule/purescript-waterslide-rs.svg?branch=master)
 ![crates.io badge](https://img.shields.io/crates/v/purescript_waterslide.svg)
+[![docs.rs badge](https://docs.rs/purescript_waterslide/badge.svg)](https://docs.rs/purescript_waterslide)
 
 ![logo](purescript_waterslide.jpg)
 
