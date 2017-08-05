@@ -1,6 +1,6 @@
 [package]
 name = "purescript_waterslide_derive"
-version = "0.2.1"
+version = "0.3.0"
 authors = ["Tom Houlé <tom@tomhoule.com>"]
 description = "Generate Purescript types from your Rust types (proc macros)"
 homepage = "https://github.com/tomhoule/purescript-waterslide-rs"
@@ -9,7 +9,7 @@ keywords = ["purescript"]
 license = "MIT/Apache-2.0"
 
 [dependencies]
-purescript_waterslide = { path = "../purescript_waterslide" }
+purescript_waterslide = { path = "../purescript_waterslide", version = "0.3.0" }
 proc-macro2 = "0.1.2"
 quote = "0.3.15"
 syn = "0.11.11"
