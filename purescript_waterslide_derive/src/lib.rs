@@ -20,24 +20,7 @@ pub fn derive_purstype(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 
     let name = &ast.ident;
     let generics = generics::shift_generics(&ast);
-    let placeholder_generics: Vec<Tokens> = ast.generics.ty_params.iter().map(|param| {
-        let type_ident = &param.ident;
-        let type_name = format!("{}", &param.ident).to_lowercase();
-        quote!{
-            struct #type_ident;
-
-            impl ToPursConstructor for #type_ident {
-                fn to_purs_constructor() -> PursConstructor {
-                    PursConstructor {
-                        module: None,
-                        name: #type_name.to_string(),
-                        parameters: vec![],
-                    }
-                }
-            }
-
-        }
-    }).collect();
+    let placeholder_generics: Vec<Tokens> = ast.generics.ty_params.iter().map(generics::make_dummy_generic).collect();
     let placeholder_generics_clone = placeholder_generics.clone();
 
     let to_purs_constructor_impl = match make_purs_constructor_impl(&ast) {
