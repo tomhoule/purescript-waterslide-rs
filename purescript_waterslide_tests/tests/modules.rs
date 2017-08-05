@@ -52,3 +52,53 @@ derive instance genericFruit :: Generic Fruit
 "
     );
 }
+
+#[test]
+fn module_with_generics() {
+    #[derive(ToPursType)]
+    enum Page<T> {
+        NonEmpty(Vec<T>),
+        OOB,
+    }
+
+    #[derive(ToPursType)]
+    struct Paginated<T, META> {
+        page_num: u32,
+        contents: Page<T>,
+        metadata: META,
+    }
+
+    #[derive(ToPursType)]
+    struct SomethingElse<T>(T);
+
+    #[derive(ToPursType)]
+    struct Proxy;
+
+    let module = purs_module!("Pagination".to_string() ;
+                              Paginated<Proxy, Proxy>,
+                              Page<Proxy>,
+                              SomethingElse<Proxy>);
+
+    assert_eq!(
+        &format!("{}", &module),
+        "module Pagination where
+
+import Data.Generic (
+class Generic
+)
+
+data Paginated t meta = Paginated { page_num :: Int, contents :: Page t, metadata :: meta }
+
+derive instance genericPaginated :: Generic Paginated
+
+data Page t = NonEmpty (Array t) | OOB
+
+derive instance genericPage :: Generic Page
+
+data SomethingElse t = SomethingElse t
+
+derive instance genericSomethingElse :: Generic SomethingElse
+
+"
+    );
+}

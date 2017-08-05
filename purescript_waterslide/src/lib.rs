@@ -18,7 +18,14 @@ impl Display for PursType {
 
         match *self {
             Struct(ref type_, ref fields) => {
-                write!(f, "{} {{ ", type_.name)?;
+                write!(f, "data {} ", type_.name)?;
+
+                for ref param in type_.parameters.iter() {
+                    write!(f, "{} ", param.name)?;
+                }
+
+                write!(f, "= {} {{ ", type_.name)?;
+
                 for (idx, &(ref name, ref constructor)) in fields.iter().enumerate() {
                     write!(f, "{} :: {}", name, constructor)?;
                     if idx < (fields.len() - 1) {
@@ -29,7 +36,14 @@ impl Display for PursType {
                 write!(f, "}}")
             },
             TupleStruct(ref type_, ref fields) => {
-                write!(f, "{}", type_.name)?;
+                write!(f, "data {} ", type_.name)?;
+
+                for ref param in type_.parameters.iter() {
+                    write!(f, "{} ", param.name)?;
+                }
+
+                write!(f, "= {}", type_.name)?;
+
                 for ref field in fields.iter() {
                     if field.parameters.is_empty() {
                         write!(f, " {}", field)?;
@@ -39,7 +53,15 @@ impl Display for PursType {
                 }
                 Ok(())
             },
-            Enum(ref _name, ref constructors) => {
+            Enum(ref type_, ref constructors) => {
+                write!(f, "data {} ", type_.name)?;
+
+                for ref param in type_.parameters.iter() {
+                    write!(f, "{} ", param.name)?;
+                }
+
+                write!(f, "= ")?;
+
                 for (idx, ref constructor) in constructors.iter().enumerate() {
                     write!(f, "{}", constructor)?;
                     if idx < constructors.len() - 1 {
@@ -247,8 +269,6 @@ impl PursModule {
         for ref param in type_.parameters.iter() {
             Self::accumulate_imports(imports, &param)
         }
-
-        println!("{:?}", imports);
     }
 }
 
@@ -271,16 +291,16 @@ impl Display for PursModule {
         for ref type_ in self.types.iter() {
             match *type_ {
                 &PursType::TupleStruct(ref constructor_, ref _fields) => {
-                    write!(f, "data {} = {}", constructor_.name, type_)?;
+                    write!(f, "{}\n\n", type_)?;
                     write!(f, "derive instance generic{} :: Generic {}\n\n", constructor_.name, constructor_.name)?;
                 },
                 &PursType::Struct(ref constructor, ref _fields) => {
-                    write!(f, "data {} = {}\n\n", constructor.name, type_)?;
+                    write!(f, "{}\n\n", type_)?;
                     write!(f, "derive instance generic{} :: Generic {}\n\n", constructor.name, constructor.name)?;
                 }
-                &PursType::Enum(ref name, ref _constructors) => {
-                    write!(f, "data {} = {}\n\n", name.name, type_)?;
-                    write!(f, "derive instance generic{} :: Generic {}\n\n", name.name, name.name)?;
+                &PursType::Enum(ref constructor, ref _constructors) => {
+                    write!(f, "{}\n\n", type_)?;
+                    write!(f, "derive instance generic{} :: Generic {}\n\n", constructor.name, constructor.name)?;
                 }
             }
         }

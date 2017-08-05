@@ -43,7 +43,7 @@ fn plain_old_struct() {
 
     assert_eq!(
         &format!("{}", Plain::to_purs_type()),
-        "Plain { age :: Int, name :: String }"
+        "data Plain = Plain { age :: Int, name :: String }"
     );
 }
 
@@ -57,7 +57,7 @@ fn struct_with_option() {
 
     assert_eq!(
         &format!("{}", Anonymous::to_purs_type()),
-        "Anonymous { age :: Int, name :: Maybe String }"
+        "data Anonymous = Anonymous { age :: Int, name :: Maybe String }"
     );
 }
 
@@ -77,7 +77,7 @@ fn struct_with_enum() {
 
     assert_eq!(
         &format!("{}", Anonymous::to_purs_type()),
-        "Anonymous { age :: Int, name :: Color }"
+        "data Anonymous = Anonymous { age :: Int, name :: Color }"
     );
 }
 
@@ -88,7 +88,7 @@ fn newtype_struct() {
 
     assert_eq!(
         &format!("{}", Email::to_purs_type()),
-        "Email String"
+        "data Email = Email String"
     );
 }
 
@@ -99,7 +99,7 @@ fn tuple_struct() {
 
     assert_eq!(
         &format!("{}", PersonName::to_purs_type()),
-        "PersonName String String"
+        "data PersonName = PersonName String String"
     );
 }
 
@@ -113,7 +113,7 @@ fn tuple_struct_with_modifiers() {
 
     assert_eq!(
         &format!("{}", Schema::to_purs_type()),
-        "Schema (Array Node)"
+        "data Schema = Schema (Array Node)"
     );
 }
 
@@ -122,7 +122,7 @@ fn struct_with_tuple_fields() {
     #[derive(ToPursType)]
     struct Cow { sides: (u8, u8), milk: bool }
 
-    assert_derives_to!(Cow, "Cow { sides :: Tuple Int Int, milk :: Boolean }");
+    assert_derives_to!(Cow, "data Cow = Cow { sides :: Tuple Int Int, milk :: Boolean }");
 }
 
 #[test]
@@ -130,7 +130,7 @@ fn unit_struct() {
     #[derive(ToPursType)]
     struct AllRight;
 
-    assert_derives_to!(AllRight, "AllRight");
+    assert_derives_to!(AllRight, "data AllRight = AllRight");
 }
 
 #[test]
@@ -144,7 +144,7 @@ fn simple_generic_struct() {
     #[derive(ToPursType)]
     struct Proxy;
 
-    assert_derives_to!(Paginated<Proxy>, "Paginated { page :: Int, data :: T }")
+    assert_derives_to!(Paginated<Proxy>, "data Paginated t = Paginated { page :: Int, data :: t }")
 }
 
 #[test]
@@ -155,5 +155,5 @@ fn simple_generic_tuple_struct() {
     #[derive(ToPursType)]
     struct Proxy;
 
-    assert_derives_to!(Validated<Proxy>, "Validated T")
+    assert_derives_to!(Validated<Proxy>, "data Validated t = Validated t")
 }

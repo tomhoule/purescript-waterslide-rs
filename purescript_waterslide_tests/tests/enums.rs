@@ -53,7 +53,7 @@ fn plain_old_enum() {
 
     assert_eq!(
         &format!("{}", GoodBoy::to_purs_type()),
-        "Doggo | Pupper | Shibe"
+        "data GoodBoy = Doggo | Pupper | Shibe"
     )
 }
 
@@ -72,7 +72,7 @@ fn enum_with_struct_and_option() {
 
     assert_eq!(
         &format!("{}", Dessert::to_purs_type()),
-        "Pie Topping | IceCream (Maybe Topping)"
+        "data Dessert = Pie Topping | IceCream (Maybe Topping)"
     )
 }
 
@@ -81,7 +81,7 @@ fn enum_with_tuples() {
     #[derive(ToPursType)]
     enum Dessert { Pie((u8, u8)), Yoghurt((String, u8)) }
 
-    assert_derives_to!(Dessert, "Pie (Tuple Int Int) | Yoghurt (Tuple String Int)")
+    assert_derives_to!(Dessert, "data Dessert = Pie (Tuple Int Int) | Yoghurt (Tuple String Int)")
 }
 
 #[test]
@@ -94,7 +94,7 @@ fn recursive_enum() {
 
     assert_eq!(
         &format!("{}", Node::to_purs_type()),
-        "Branch Node | Leaf Int"
+        "data Node = Branch Node | Leaf Int"
     );
 }
 
@@ -114,7 +114,7 @@ fn mutually_recursive_types() {
 
     assert_eq!(
         &format!("{}", Node::to_purs_type()),
-        "Branch NumberedNode | Leaf Int"
+        "data Node = Branch NumberedNode | Leaf Int"
     );
 }
 
@@ -131,6 +131,6 @@ fn simple_generic_enum() {
 
     assert_eq!(
         &format!("{}", Choice::<Proxy, Proxy>::to_purs_type()),
-        "Left L | Right R"
+        "data Choice l r = Left l | Right r"
     );
 }
