@@ -4,6 +4,8 @@ version = "0.1.0"
 authors = ["Tom Houlé <tom@tomhoule.com>"]
 
 [dependencies]
-purescript_waterslide = { path = "../purescript_waterslide" }
+chrono = "*"
+purescript_waterslide = { path = "../purescript_waterslide", features = ["uuid_support", "chrono_support"] }
 purescript_waterslide_derive = { path = "../purescript_waterslide_derive" }
 void = "*"
+uuid = "*"
