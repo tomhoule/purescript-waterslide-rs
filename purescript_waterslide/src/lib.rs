@@ -8,6 +8,7 @@ mod default_implementations;
 mod purs_constructor;
 mod purs_module;
 mod purs_type;
+mod third_party;
 
 pub use purs_constructor::*;
 pub use purs_type::*;

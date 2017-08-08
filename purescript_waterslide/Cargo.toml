@@ -1,9 +1,17 @@
 [package]
 name = "purescript_waterslide"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Tom Houlé <tom@tomhoule.com>"]
 description = "Generate Purescript types from your Rust types"
 homepage = "https://github.com/tomhoule/purescript-waterslide-rs"
 repository = "https://github.com/tomhoule/purescript-waterslide-rs"
 keywords = ["purescript"]
 license = "MIT/Apache-2.0"
+
+[dependencies]
+chrono = { version = "0.4.0", optional = true }
+uuid = { version = "0.5.1", optional = true }
+
+[features]
+chrono_support = ["chrono"]
+uuid_support = ["uuid"]
