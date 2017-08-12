@@ -51,7 +51,6 @@ derive instance genericColor :: Generic Color
 data Fruit = Fruit { color :: Color, price :: Int, currency :: Currency }
 
 derive instance genericFruit :: Generic Fruit
-
 "
     );
 }
@@ -101,7 +100,6 @@ derive instance genericPage :: Generic Page
 data SomethingElse t = SomethingElse t
 
 derive instance genericSomethingElse :: Generic SomethingElse
-
 "
     );
 }
