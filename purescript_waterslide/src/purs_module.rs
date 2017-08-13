@@ -57,7 +57,7 @@ impl PursModule {
 
     fn accumulate_imports(imports: &mut BTreeMap<String, Vec<String>>, type_: &PursConstructor) {
         if let Some(ref import) = type_.module {
-            let mut value = imports.entry(import.clone()).or_insert_with(Vec::new);
+            let value = imports.entry(import.clone()).or_insert_with(Vec::new);
             if value.iter().find(|i| **i == type_.name).is_none() {
                 value.push(type_.name.clone())
             }
@@ -86,35 +86,30 @@ impl Display for PursModule {
         write!(f, "\n")?;
 
         let types = &self.types;
-        let output: Vec<String> = types.into_iter().map(|type_| {
-                        match *type_ {
-                            PursType::TupleStruct(ref constructor, ref _fields) => {
-                                format!(
-                                    "{}\n\nderive instance generic{} :: Generic {}\n",
-                                    type_,
-                                    constructor.name,
-                                    constructor.name
-                                )
-                            }
-                            PursType::Struct(ref constructor, ref _fields) => {
-                                format!(
-                                    "{}\n\nderive instance generic{} :: Generic {}\n",
-                                    type_,
-                                    constructor.name,
-                                    constructor.name
-                                )
-                            }
-                            PursType::Enum(ref constructor, ref _constructors) => {
-                                format!(
-                                    "{}\n\nderive instance generic{} :: Generic {}\n",
-                                    type_,
-                                    constructor.name,
-                                    constructor.name
-                                )
-                            }
-                        }
-        }).collect();
-        write!(f,"{}", output.join("\n"))?;
+        let output: Vec<String> = types
+            .into_iter()
+            .map(|type_| match *type_ {
+                PursType::TupleStruct(ref constructor, ref _fields) => format!(
+                    "{}\n\nderive instance generic{} :: Generic {}\n",
+                    type_,
+                    constructor.name,
+                    constructor.name
+                ),
+                PursType::Struct(ref constructor, ref _fields) => format!(
+                    "{}\n\nderive instance generic{} :: Generic {}\n",
+                    type_,
+                    constructor.name,
+                    constructor.name
+                ),
+                PursType::Enum(ref constructor, ref _constructors) => format!(
+                    "{}\n\nderive instance generic{} :: Generic {}\n",
+                    type_,
+                    constructor.name,
+                    constructor.name
+                ),
+            })
+            .collect();
+        write!(f, "{}", output.join("\n"))?;
         Ok(())
     }
 }
