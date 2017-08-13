@@ -85,37 +85,36 @@ impl Display for PursModule {
         }
         write!(f, "\n")?;
 
-        for type_ in &self.types {
-            match *type_ {
-                PursType::TupleStruct(ref constructor_, ref _fields) => {
-                    write!(f, "{}\n\n", type_)?;
-                    write!(
-                        f,
-                        "derive instance generic{} :: Generic {}\n\n",
-                        constructor_.name,
-                        constructor_.name
-                    )?;
-                }
-                PursType::Struct(ref constructor, ref _fields) => {
-                    write!(f, "{}\n\n", type_)?;
-                    write!(
-                        f,
-                        "derive instance generic{} :: Generic {}\n\n",
-                        constructor.name,
-                        constructor.name
-                    )?;
-                }
-                PursType::Enum(ref constructor, ref _constructors) => {
-                    write!(f, "{}\n\n", type_)?;
-                    write!(
-                        f,
-                        "derive instance generic{} :: Generic {}\n\n",
-                        constructor.name,
-                        constructor.name
-                    )?;
-                }
-            }
-        }
+        let types = &self.types;
+        let output: Vec<String> = types.into_iter().map(|type_| {
+                        match *type_ {
+                            PursType::TupleStruct(ref constructor, ref _fields) => {
+                                format!(
+                                    "{}\n\nderive instance generic{} :: Generic {}\n",
+                                    type_,
+                                    constructor.name,
+                                    constructor.name
+                                )
+                            }
+                            PursType::Struct(ref constructor, ref _fields) => {
+                                format!(
+                                    "{}\n\nderive instance generic{} :: Generic {}\n",
+                                    type_,
+                                    constructor.name,
+                                    constructor.name
+                                )
+                            }
+                            PursType::Enum(ref constructor, ref _constructors) => {
+                                format!(
+                                    "{}\n\nderive instance generic{} :: Generic {}\n",
+                                    type_,
+                                    constructor.name,
+                                    constructor.name
+                                )
+                            }
+                        }
+        }).collect();
+        write!(f,"{}", output.join("\n"))?;
         Ok(())
     }
 }
