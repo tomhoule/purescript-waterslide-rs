@@ -9,3 +9,5 @@ before_script:
 script:
   - if [ "$TRAVIS_RUST_VERSION" = "nightly" ]; then (cargo fmt --all -- --write-mode=diff) fi
   - cargo test --verbose --all
+notifications:
+  email: false
