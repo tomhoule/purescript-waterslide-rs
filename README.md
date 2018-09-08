@@ -5,14 +5,13 @@
 
 ![logo](purescript_waterslide.jpg)
 
+__NOTE: This library is currently unmaintained. Please contact @tomhoule if you would like to do something about it.__
+
 Wouldn't it be nice if you could share your data type definitions between your
 Rust backend and your Purescript app? Now you can!
 
 Waterslide generates Purescript type definitions from Rust structs and enums.
 It works on stable Rust.
-
-The library is still young but the core features are working. The idea is to
-release early, release often and gather feedback to get to a 1.0 version soon.
 
 ## Basic usage
 
